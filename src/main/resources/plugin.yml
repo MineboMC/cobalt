@@ -1,0 +1,4 @@
+name: Cobalt
+version: '1.0-DEV'
+main: net.minebo.cobalt.Cobalt
+api-version: '1.18'
