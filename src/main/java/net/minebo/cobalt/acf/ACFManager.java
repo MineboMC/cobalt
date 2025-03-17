@@ -1,5 +1,7 @@
 package net.minebo.cobalt.acf;
 
+import co.aikar.commands.BukkitMessageFormatter;
+import co.aikar.commands.MessageType;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import java.util.UUID;
@@ -17,10 +19,21 @@ public class ACFManager {
 
    public ACFManager(JavaPlugin plugin) {
       this.plugin = plugin;
+
       ACFCommandController.commandController = new PaperCommandManager(plugin);
+
       ACFCommandController.commandController.enableUnstableAPI("help");
+
+      ACFCommandController.commandController.setFormat(
+              MessageType.SYNTAX,
+              new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.GOLD, ChatColor.WHITE)
+      );
+
+      ACFCommandController.commandController.setFormat(MessageType.HELP, new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.GOLD, ChatColor.GOLD));
+
       this.registerContexts();
       this.registerCompletions();
+
       ACFCommandController.registerAll(plugin);
    }
 
