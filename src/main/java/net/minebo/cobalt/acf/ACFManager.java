@@ -33,8 +33,6 @@ public class ACFManager {
 
       this.registerContexts();
       this.registerCompletions();
-
-      ACFCommandController.registerAll(plugin);
    }
 
    public void registerContexts() {
