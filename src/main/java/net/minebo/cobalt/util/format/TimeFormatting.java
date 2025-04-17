@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeFormatting {
 
-    public String getRemaining(Long time) {
+    public static String getRemaining(Long time) {
         if (time > TimeUnit.SECONDS.toMillis(60L)) {
             return DurationFormatUtils.formatDuration(time, "m:ss");
         } else {
