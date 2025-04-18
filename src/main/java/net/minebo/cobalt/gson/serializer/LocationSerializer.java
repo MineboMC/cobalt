@@ -10,6 +10,7 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 
 public class LocationSerializer implements JsonSerializer<Location>, JsonDeserializer<Location> {
    public JsonElement serialize(Location location, Type typeOfSrc, JsonSerializationContext context) {
