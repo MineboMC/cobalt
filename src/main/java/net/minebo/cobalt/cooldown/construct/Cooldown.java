@@ -25,9 +25,10 @@ public class Cooldown implements Listener {
      * @param player    The player.
      * @param cooldown  Time in seconds.
      */
-    public void applyCooldown(Player player, long cooldown, JavaPlugin plugin) {
+    public void applyCooldown(Player player, long cooldown, TimeUnit unit, JavaPlugin plugin) {
         UUID uuid = player.getUniqueId();
-        long expireTime = System.currentTimeMillis() + (cooldown * 1000);
+        long cooldownMillis = unit.toMillis(cooldown);
+        long expireTime = System.currentTimeMillis() + (cooldownMillis * 1000);
         cooldownMap.put(uuid, expireTime);
 
         // Call overridable hook
@@ -53,7 +54,7 @@ public class Cooldown implements Listener {
     public String getRemaining(Player player) {
         long l = cooldownMap.get(player.getUniqueId()) - System.currentTimeMillis();
         if (l > TimeUnit.SECONDS.toMillis(60)) {
-            return DurationFormatUtils.formatDuration(l, "m:ss");
+            return DurationFormatUtils.formatDuration(l, "H:mm:ss");
         }
         String formatted = DurationFormatUtils.formatDuration(l, "s.S");
         return formatted.substring(0, formatted.length() - 2);
