@@ -27,8 +27,7 @@ public class Cooldown implements Listener {
      */
     public void applyCooldown(Player player, long cooldown, TimeUnit unit, JavaPlugin plugin) {
         UUID uuid = player.getUniqueId();
-        long cooldownMillis = unit.toMillis(cooldown);
-        long expireTime = System.currentTimeMillis() + (cooldownMillis * 1000);
+        long expireTime = System.currentTimeMillis() + unit.toMillis(cooldown);
         cooldownMap.put(uuid, expireTime);
 
         // Call overridable hook
