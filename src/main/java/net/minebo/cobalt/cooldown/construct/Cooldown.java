@@ -51,13 +51,18 @@ public class Cooldown implements Listener {
     }
 
     public String getRemaining(Player player) {
-        long l = cooldownMap.get(player.getUniqueId()) - System.currentTimeMillis();
-        if (l > TimeUnit.SECONDS.toMillis(60)) {
-            return DurationFormatUtils.formatDuration(l, "H:mm:ss");
+        long millisLeft = cooldownMap.get(player.getUniqueId()) - System.currentTimeMillis();
+        if (millisLeft <= 0) return "0";
+
+        if (millisLeft >= TimeUnit.MINUTES.toMillis(1)) {
+            return DurationFormatUtils.formatDuration(millisLeft, "mm:ss");
         }
-        String formatted = DurationFormatUtils.formatDuration(l, "s.S");
-        return formatted.substring(0, formatted.length() - 2);
+
+        // Show seconds with one decimal (e.g., 15.3s)
+        double seconds = millisLeft / 1000.0;
+        return String.format("%.1fs", seconds);
     }
+
 
     public void removeCooldown(Player player) {
         cooldownMap.remove(player.getUniqueId());
