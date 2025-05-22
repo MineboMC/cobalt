@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 public class ServerUtil {
 
-    private static String getColoredTPS() {
+    public static String getColoredTPS() {
         double tps = getTPS();
 
         return ((tps > 18.0)
