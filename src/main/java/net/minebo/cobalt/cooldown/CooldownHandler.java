@@ -18,7 +18,7 @@ public class CooldownHandler {
     }
 
     public void registerCooldown(String id, Cooldown cooldown) {
-        cooldownMap.put(id, cooldown);
+        cooldownMap.put(id.toLowerCase(), cooldown);
         Bukkit.getPluginManager().registerEvents(cooldown, plugin);
     }
 
