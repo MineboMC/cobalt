@@ -2,7 +2,7 @@ package net.minebo.cobalt.cooldown.construct;
 
 import lombok.Getter;
 import net.minebo.cobalt.cooldown.CooldownHandler;
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;

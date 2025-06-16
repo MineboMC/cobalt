@@ -48,19 +48,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>ca.bkaw</groupId>
-                <artifactId>paper-nms-maven-plugin</artifactId>
-                <version>1.4.5</version>
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>remap</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -99,6 +86,10 @@
             <id>aikar</id>
             <url>https://repo.aikar.co/content/groups/aikar/</url>
         </repository>
+        <repository>
+            <id>azisaba</id>
+            <url>https://repo.azisaba.net/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -110,9 +101,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.18.2-R0.1-SNAPSHOT</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -165,15 +156,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>ca.bkaw</groupId>
-            <artifactId>paper-nms</artifactId>
-            <version>1.21.4-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.24.3</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

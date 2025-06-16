@@ -1,6 +1,6 @@
 package net.minebo.cobalt.util.format;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 
 import java.util.concurrent.TimeUnit;
