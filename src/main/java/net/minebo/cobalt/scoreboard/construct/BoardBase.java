@@ -21,7 +21,7 @@ import net.minebo.cobalt.util.Reflection;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-public abstract class BoardBase {
+public abstract class BoardBase<T> {
 
    private static final Map<Class<?>, Field[]> PACKETS = new HashMap<>(8);
    protected static final String[] COLOR_CODES = Arrays.stream(ChatColor.values())
@@ -48,11 +48,15 @@ public abstract class BoardBase {
    private static final Class<?> DISPLAY_SLOT_TYPE;
    private static final Class<?> ENUM_SB_HEALTH_DISPLAY;
    private static final Class<?> ENUM_SB_ACTION;
+   private static final Class<?> ENUM_VISIBILITY;
+   private static final Class<?> ENUM_COLLISION_RULE;
    private static final Object BLANK_NUMBER_FORMAT;
    private static final Object SIDEBAR_DISPLAY_SLOT;
    private static final Object ENUM_SB_HEALTH_DISPLAY_INTEGER;
    private static final Object ENUM_SB_ACTION_CHANGE;
    private static final Object ENUM_SB_ACTION_REMOVE;
+   private static final Object ENUM_VISIBILITY_ALWAYS;
+   private static final Object ENUM_COLLISION_RULE_ALWAYS;
 
    static {
       try {
@@ -80,8 +84,7 @@ public abstract class BoardBase {
          Class<?> packetSbScoreClass = Reflection.nmsClass(gameProtocolPackage, "PacketPlayOutScoreboardScore", "ClientboundSetScorePacket");
          Class<?> packetSbTeamClass = Reflection.nmsClass(gameProtocolPackage, "PacketPlayOutScoreboardTeam", "ClientboundSetPlayerTeamPacket");
          Class<?> sbTeamClass = VersionType.V1_17.isHigherOrEqual()
-                 ? Reflection.innerClass(packetSbTeamClass, innerClass -> !Enum.class.isAssignableFrom((Class<?>) innerClass))
-                 : null;
+                 ? Reflection.innerClass(packetSbTeamClass, innerClass -> !innerClass.isEnum()) : null;
          Field playerConnectionField = Arrays.stream(entityPlayerClass.getFields())
                  .filter(field -> field.getType().isAssignableFrom(playerConnectionClass))
                  .findFirst().orElseThrow(NoSuchFieldException::new);
@@ -138,10 +141,22 @@ public abstract class BoardBase {
          PACKET_SB_SET_SCORE = packetSbSetScore;
          PACKET_SB_RESET_SCORE = packetSbResetScore;
          PACKET_SB_TEAM = Reflection.findPacketConstructor(packetSbTeamClass, lookup);
-         PACKET_SB_SERIALIZABLE_TEAM = sbTeamClass == null ? null : Reflection.findPacketConstructor(sbTeamClass, lookup);
+         PACKET_SB_SERIALIZABLE_TEAM = sbTeamClass != null ? Reflection.findPacketConstructor(sbTeamClass, lookup) : null;
          FIXED_NUMBER_FORMAT = fixedFormatConstructor;
          BLANK_NUMBER_FORMAT = blankNumberFormat;
          SCORE_OPTIONAL_COMPONENTS = scoreOptionalComponents;
+
+         if (VersionType.V1_17.isHigherOrEqual()) {
+            ENUM_VISIBILITY = Reflection.nmsClass("world.scores", "ScoreboardTeamBase$EnumNameTagVisibility", "Team$Visibility");
+            ENUM_COLLISION_RULE = Reflection.nmsClass("world.scores", "ScoreboardTeamBase$EnumTeamPush", "Team$CollisionRule");
+            ENUM_VISIBILITY_ALWAYS = Reflection.enumValueOf(ENUM_VISIBILITY, "ALWAYS", 0);
+            ENUM_COLLISION_RULE_ALWAYS = Reflection.enumValueOf(ENUM_COLLISION_RULE, "ALWAYS", 0);
+         } else {
+            ENUM_VISIBILITY = null;
+            ENUM_COLLISION_RULE = null;
+            ENUM_VISIBILITY_ALWAYS = null;
+            ENUM_COLLISION_RULE_ALWAYS = null;
+         }
 
          for (Class<?> clazz : Arrays.asList(packetSbObjClass, packetSbDisplayObjClass, packetSbScoreClass, packetSbTeamClass, sbTeamClass)) {
             if (clazz == null) {
@@ -161,10 +176,10 @@ public abstract class BoardBase {
                     ? "ScoreboardServer$Action"
                     : "PacketPlayOutScoreboardScore$EnumScoreboardAction";
             ENUM_SB_HEALTH_DISPLAY = Reflection.nmsClass("world.scores.criteria", "IScoreboardCriteria$EnumScoreboardHealthDisplay", "ObjectiveCriteria$RenderType");
-            ENUM_SB_ACTION = Reflection.nmsClass("server", enumSbActionClass, "ServerScoreboard$Method");
+            ENUM_SB_ACTION = Reflection.nmsOptionalClass("server", enumSbActionClass, "ServerScoreboard$Method").orElse(null);
             ENUM_SB_HEALTH_DISPLAY_INTEGER = Reflection.enumValueOf(ENUM_SB_HEALTH_DISPLAY, "INTEGER", 0);
-            ENUM_SB_ACTION_CHANGE = Reflection.enumValueOf(ENUM_SB_ACTION, "CHANGE", 0);
-            ENUM_SB_ACTION_REMOVE = Reflection.enumValueOf(ENUM_SB_ACTION, "REMOVE", 1);
+            ENUM_SB_ACTION_CHANGE = ENUM_SB_ACTION != null ? Reflection.enumValueOf(ENUM_SB_ACTION, "CHANGE", 0) : null;
+            ENUM_SB_ACTION_REMOVE = ENUM_SB_ACTION != null ? Reflection.enumValueOf(ENUM_SB_ACTION, "REMOVE", 1) : null;
          } else {
             ENUM_SB_HEALTH_DISPLAY = null;
             ENUM_SB_ACTION = null;
@@ -180,9 +195,9 @@ public abstract class BoardBase {
    private final Player player;
    private final String id;
 
-   private final List<String> lines = new ArrayList<>();
-   private final List<String> scores = new ArrayList<>();
-   private String title = emptyLine();
+   private final List<T> lines = new ArrayList<>();
+   private final List<T> scores = new ArrayList<>();
+   private T title = emptyLine();
 
    private boolean deleted = false;
 
@@ -208,7 +223,7 @@ public abstract class BoardBase {
     *
     * @return the scoreboard title
     */
-   public String getTitle() {
+   public T getTitle() {
       return this.title;
    }
 
@@ -219,7 +234,7 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if the title is longer than 32 chars on 1.12 or lower
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public void updateTitle(String title) {
+   public void updateTitle(T title) {
       if (this.title.equals(Objects.requireNonNull(title, "title"))) {
          return;
       }
@@ -238,7 +253,7 @@ public abstract class BoardBase {
     *
     * @return the scoreboard lines
     */
-   public List<String> getLines() {
+   public List<T> getLines() {
       return new ArrayList<>(this.lines);
    }
 
@@ -249,7 +264,7 @@ public abstract class BoardBase {
     * @return the line
     * @throws IndexOutOfBoundsException if the line is higher than {@code size}
     */
-   public String getLine(int line) {
+   public T getLine(int line) {
       checkLineNumber(line, true, false);
 
       return this.lines.get(line);
@@ -262,7 +277,7 @@ public abstract class BoardBase {
     * @return the text of how the line is displayed
     * @throws IndexOutOfBoundsException if the line is higher than {@code size}
     */
-   public Optional<String> getScore(int line) {
+   public Optional<T> getScore(int line) {
       checkLineNumber(line, true, false);
 
       return Optional.ofNullable(this.scores.get(line));
@@ -275,7 +290,7 @@ public abstract class BoardBase {
     * @param text the new line text
     * @throws IndexOutOfBoundsException if the line is higher than {@link #size() size() + 1}
     */
-   public synchronized void updateLine(int line, String text) {
+   public synchronized void updateLine(int line, T text) {
       updateLine(line, text, null);
    }
 
@@ -288,7 +303,7 @@ public abstract class BoardBase {
     * @param scoreText the new line's score, if null will not change current value
     * @throws IndexOutOfBoundsException if the line is higher than {@link #size() size() + 1}
     */
-   public synchronized void updateLine(int line, String text, String scoreText) {
+   public synchronized void updateLine(int line, T text, T scoreText) {
       checkLineNumber(line, false, false);
 
       try {
@@ -305,8 +320,8 @@ public abstract class BoardBase {
             return;
          }
 
-         List<String> newLines = new ArrayList<>(this.lines);
-         List<String> newScores = new ArrayList<>(this.scores);
+         List<T> newLines = new ArrayList<>(this.lines);
+         List<T> newScores = new ArrayList<>(this.scores);
 
          if (line > size()) {
             for (int i = size(); i < line; i++) {
@@ -336,8 +351,8 @@ public abstract class BoardBase {
          return;
       }
 
-      List<String> newLines = new ArrayList<>(this.lines);
-      List<String> newScores = new ArrayList<>(this.scores);
+      List<T> newLines = new ArrayList<>(this.lines);
+      List<T> newScores = new ArrayList<>(this.scores);
       newLines.remove(line);
       newScores.remove(line);
       updateLines(newLines, newScores);
@@ -350,7 +365,7 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if one line is longer than 30 chars on 1.12 or lower
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public void updateLines(String... lines) {
+   public void updateLines(T... lines) {
       updateLines(Arrays.asList(lines));
    }
 
@@ -361,7 +376,7 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if one line is longer than 30 chars on 1.12 or lower
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public synchronized void updateLines(Collection<String> lines) {
+   public synchronized void updateLines(Collection<T> lines) {
       updateLines(lines, null);
    }
 
@@ -375,7 +390,7 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if lines and scores are not the same size
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public synchronized void updateLines(Collection<String> lines, Collection<String> scores) {
+   public synchronized void updateLines(Collection<T> lines, Collection<T> scores) {
       Objects.requireNonNull(lines, "lines");
       checkLineNumber(lines.size(), false, true);
 
@@ -383,11 +398,11 @@ public abstract class BoardBase {
          throw new IllegalArgumentException("The size of the scores must match the size of the board");
       }
 
-      List<String> oldLines = new ArrayList<>(this.lines);
+      List<T> oldLines = new ArrayList<>(this.lines);
       this.lines.clear();
       this.lines.addAll(lines);
 
-      List<String> oldScores = new ArrayList<>(this.scores);
+      List<T> oldScores = new ArrayList<>(this.scores);
       this.scores.clear();
       this.scores.addAll(scores != null ? scores : Collections.nCopies(lines.size(), null));
 
@@ -395,7 +410,7 @@ public abstract class BoardBase {
 
       try {
          if (oldLines.size() != linesSize) {
-            List<String> oldLinesCopy = new ArrayList<>(oldLines);
+            List<T> oldLinesCopy = new ArrayList<>(oldLines);
 
             if (oldLines.size() > linesSize) {
                for (int i = oldLinesCopy.size(); i > linesSize; i--) {
@@ -433,7 +448,7 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if the line number is not in range
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public synchronized void updateScore(int line, String text) {
+   public synchronized void updateScore(int line, T text) {
       checkLineNumber(line, true, false);
 
       this.scores.set(line, text);
@@ -466,7 +481,7 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if the size of the texts does not match the current size of the board
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public synchronized void updateScores(String... texts) {
+   public synchronized void updateScores(T... texts) {
       updateScores(Arrays.asList(texts));
    }
 
@@ -478,14 +493,14 @@ public abstract class BoardBase {
     * @throws IllegalArgumentException if the size of the texts does not match the current size of the board
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public synchronized void updateScores(Collection<String> texts) {
+   public synchronized void updateScores(Collection<T> texts) {
       Objects.requireNonNull(texts, "texts");
 
       if (this.scores.size() != this.lines.size()) {
          throw new IllegalArgumentException("The size of the scores must match the size of the board");
       }
 
-      List<String> newScores = new ArrayList<>(texts);
+      List<T> newScores = new ArrayList<>(texts);
       for (int i = 0; i < this.scores.size(); i++) {
          if (Objects.equals(this.scores.get(i), newScores.get(i))) {
             continue;
@@ -570,11 +585,11 @@ public abstract class BoardBase {
 
    protected abstract void sendLineChange(int score) throws Throwable;
 
-   protected abstract Object toMinecraftComponent(String value) throws Throwable;
+   protected abstract Object toMinecraftComponent(T value) throws Throwable;
 
-   protected abstract String serializeLine(String value);
+   protected abstract String serializeLine(T value);
 
-   protected abstract String emptyLine();
+   protected abstract T emptyLine();
 
    private void checkLineNumber(int line, boolean checkInRange, boolean checkMax) {
       if (line < 0) {
@@ -594,11 +609,11 @@ public abstract class BoardBase {
       return this.lines.size() - line - 1;
    }
 
-   protected String getLineByScore(int score) {
+   protected T getLineByScore(int score) {
       return getLineByScore(this.lines, score);
    }
 
-   protected String getLineByScore(List<String> lines, int score) {
+   protected T getLineByScore(List<T> lines, int score) {
       return score < lines.size() ? lines.get(lines.size() - score - 1) : null;
    }
 
@@ -672,7 +687,7 @@ public abstract class BoardBase {
          return;
       }
 
-      String scoreFormat = getLineByScore(this.scores, score);
+      T scoreFormat = getLineByScore(this.scores, score);
       Object format = scoreFormat != null
               ? FIXED_NUMBER_FORMAT.invoke(toMinecraftComponent(scoreFormat))
               : BLANK_NUMBER_FORMAT;
@@ -687,7 +702,7 @@ public abstract class BoardBase {
       sendTeamPacket(score, mode, null, null);
    }
 
-   protected void sendTeamPacket(int score, TeamMode mode, String prefix, String suffix)
+   protected void sendTeamPacket(int score, TeamMode mode, T prefix, T suffix)
            throws Throwable {
       if (mode == TeamMode.ADD_PLAYERS || mode == TeamMode.REMOVE_PLAYERS) {
          throw new UnsupportedOperationException();
@@ -710,8 +725,10 @@ public abstract class BoardBase {
          setField(team, CHAT_FORMAT_ENUM, RESET_FORMATTING); // Color
          setComponentField(team, prefix, 1); // Prefix
          setComponentField(team, suffix, 2); // Suffix
-         setField(team, String.class, "always", 0); // Visibility
-         setField(team, String.class, "always", 1); // Collisions
+         setField(team, String.class, "always", 0); // Visibility before 1.21.5
+         setField(team, String.class, "always", 1); // Collisions before 1.21.5
+         setField(team, ENUM_VISIBILITY, ENUM_VISIBILITY_ALWAYS, 0); // 1.21.5+
+         setField(team, ENUM_COLLISION_RULE, ENUM_COLLISION_RULE_ALWAYS, 0); // 1.21.5+
          setField(packet, Optional.class, Optional.of(team));
       } else {
          setComponentField(packet, prefix, 2); // Prefix
@@ -754,7 +771,7 @@ public abstract class BoardBase {
       }
    }
 
-   private void setComponentField(Object packet, String value, int count) throws Throwable {
+   private void setComponentField(Object packet, T value, int count) throws Throwable {
       if (!VersionType.V1_13.isHigherOrEqual()) {
          String line = value != null ? serializeLine(value) : "";
          setField(packet, String.class, line, count);

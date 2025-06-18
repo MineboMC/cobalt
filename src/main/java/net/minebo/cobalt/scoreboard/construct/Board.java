@@ -8,7 +8,8 @@ import net.minebo.cobalt.util.Reflection;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-public class Board extends BoardBase {
+public class Board extends BoardBase<String> {
+
    private static final MethodHandle MESSAGE_FROM_STRING;
    private static final Object EMPTY_MESSAGE;
 
