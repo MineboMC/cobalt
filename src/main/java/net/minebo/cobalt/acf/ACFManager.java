@@ -7,6 +7,7 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import java.util.UUID;
 import lombok.Generated;
 import net.minebo.cobalt.acf.completion.ChatColorCompletionHandler;
+import net.minebo.cobalt.acf.completion.MaterialCompletionHandler;
 import net.minebo.cobalt.acf.completion.PlayerCompletionHandler;
 import net.minebo.cobalt.acf.context.ChatColorContextResolver;
 import net.minebo.cobalt.acf.context.OnlinePlayerContextResolver;
@@ -43,6 +44,7 @@ public class ACFManager {
 
    public void registerCompletions() {
       ACFCommandController.registerCompletion("chatcolors", new ChatColorCompletionHandler());
+      ACFCommandController.registerCompletion("materials", new MaterialCompletionHandler());
       ACFCommandController.registerCompletion("players", new PlayerCompletionHandler());
    }
 
