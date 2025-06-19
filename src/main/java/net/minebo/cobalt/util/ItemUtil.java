@@ -12,24 +12,24 @@ import java.util.stream.Collectors;
 public class ItemUtil {
 
     static String[] baseIds = {
-            "wb",
-            "nvp", "nvpe",
-            "invp", "invpe",
-            "ljp1", "ljp1e", "ljp2",
-            "frp1", "frp1e",
-            "swp1", "swp1e", "swp2",
-            "slp1", "slp1e", "slp2",
-            "wbp1", "wbp1e",
-            "hp1", "hp2",
-            "dp1", "dp2",
-            "pp1", "pp1e", "pp2",
-            "rp1", "rp1e", "rp2",
-            "strp1", "strp1e", "strp2",
-            "wp1", "wp1e",
-            "lp",
-            "tmp1", "tmp1e", "tmp2",
-            "sfp1", "sfp1e",
-            "wcp", "wvp", "ozp", "ifp"
+            "POTION_OF_WATER",
+            "POTION_OF_NIGHT_VISION", "POTION_OF_NIGHT_VISION_LONG",
+            "POTION_OF_INVISIBILITY", "POTION_OF_INVISIBILITY_LONG",
+            "POTION_OF_LEAPING", "POTION_OF_LEAPING_LONG", "POTION_OF_LEAPING_2",
+            "POTION_OF_FIRE_RESISTANCE", "POTION_OF_FIRE_RESISTANCE_LONG",
+            "POTION_OF_SWIFTNESS", "POTION_OF_SWIFTNESS_LONG", "POTION_OF_SWIFTNESS_2",
+            "POTION_OF_SLOWNESS", "POTION_OF_SLOWNESS_LONG", "POTION_OF_SLOWNESS_2",
+            "POTION_OF_WATER_BREATHING", "POTION_OF_WATER_BREATHING_LONG",
+            "POTION_OF_HEALING", "POTION_OF_HEALING_2",
+            "POTION_OF_HARMING", "POTION_OF_HARMING_2",
+            "POTION_OF_POISON", "POTION_OF_POISON_LONG", "POTION_OF_POISON_2",
+            "POTION_OF_REGENERATION", "POTION_OF_REGENERATION_LONG", "POTION_OF_REGENERATION_2",
+            "POTION_OF_STRENGTH", "POTION_OF_STRENGTH_LONG", "POTION_OF_STRENGTH_2",
+            "POTION_OF_WEAKNESS", "POTION_OF_WEAKNESS_LONG",
+            "POTION_OF_LUCK",
+            "POTION_OF_TURTLE_MASTER", "POTION_OF_TURTLE_MASTER_LONG", "POTION_OF_TURTLE_MASTER_2",
+            "POTION_OF_SLOW_FALLING", "POTION_OF_SLOW_FALLING_LONG",
+            "POTION_OF_WIND_CHARGED", "POTION_OF_WEAVING", "POTION_OF_OOZING", "POTION_OF_INFESTATION"
     };
 
     public static String getItemId(ItemStack item) {
@@ -45,77 +45,74 @@ public class ItemUtil {
         if (meta == null) return "unknown";
 
         PotionType type = meta.getBasePotionType();
-        String suffix = item.getType() == Material.SPLASH_POTION ? "s" : "";
+        String prefix = item.getType() == Material.SPLASH_POTION ? "SPLASH_" : "";
 
         switch (type) {
-            case WATER: return "waterp" + suffix;
-            case MUNDANE: return "mundanep" + suffix;
-            case THICK: return "thickp" + suffix;
-            case AWKWARD: return "awkwardp" + suffix;
+            case WATER: return prefix + "POTION_OF_WATER";
+            case NIGHT_VISION: return prefix + "POTION_OF_NIGHT_VISION";
+            case LONG_NIGHT_VISION: return prefix + "POTION_OF_NIGHT_VISION_LONG";
 
-            case NIGHT_VISION: return "nvp" + suffix;
-            case LONG_NIGHT_VISION: return "nvpe" + suffix;
+            case INVISIBILITY: return prefix + "POTION_OF_INVISIBILITY";
+            case LONG_INVISIBILITY: return prefix + "POTION_OF_INVISIBILITY_LONG";
 
-            case INVISIBILITY: return "invp" + suffix;
-            case LONG_INVISIBILITY: return "invpe" + suffix;
+            case LEAPING: return prefix + "POTION_OF_LEAPING";
+            case LONG_LEAPING: return prefix + "POTION_OF_LEAPING_LONG";
+            case STRONG_LEAPING: return prefix + "POTION_OF_LEAPING_2";
 
-            case LEAPING: return "ljp1" + suffix;
-            case LONG_LEAPING: return "ljp1e" + suffix;
-            case STRONG_LEAPING: return "ljp2" + suffix;
+            case FIRE_RESISTANCE: return prefix + "POTION_OF_FIRE_RESISTANCE";
+            case LONG_FIRE_RESISTANCE: return prefix + "POTION_OF_FIRE_RESISTANCE_LONG";
 
-            case FIRE_RESISTANCE: return "frp1" + suffix;
-            case LONG_FIRE_RESISTANCE: return "frp1e" + suffix;
+            case SWIFTNESS: return prefix + "POTION_OF_SWIFTNESS";
+            case LONG_SWIFTNESS: return prefix + "POTION_OF_SWIFTNESS_LONG";
+            case STRONG_SWIFTNESS: return prefix + "POTION_OF_SWIFTNESS_2";
 
-            case SWIFTNESS: return "swp1" + suffix;
-            case LONG_SWIFTNESS: return "swp1e" + suffix;
-            case STRONG_SWIFTNESS: return "swp2" + suffix;
+            case SLOWNESS: return prefix + "POTION_OF_SLOWNESS";
+            case LONG_SLOWNESS: return prefix + "POTION_OF_SLOWNESS_LONG";
+            case STRONG_SLOWNESS: return prefix + "POTION_OF_SLOWNESS_2";
 
-            case SLOWNESS: return "slp1" + suffix;
-            case LONG_SLOWNESS: return "slp1e" + suffix;
-            case STRONG_SLOWNESS: return "slp2" + suffix;
+            case WATER_BREATHING: return prefix + "POTION_OF_WATER_BREATHING";
+            case LONG_WATER_BREATHING: return prefix + "POTION_OF_WATER_BREATHING_LONG";
 
-            case WATER_BREATHING: return "wbp1" + suffix;
-            case LONG_WATER_BREATHING: return "wbp1e" + suffix;
+            case HEALING: return prefix + "POTION_OF_HEALING";
+            case STRONG_HEALING: return prefix + "POTION_OF_HEALING_2";
 
-            case HEALING: return "hp1" + suffix;
-            case STRONG_HEALING: return "hp2" + suffix;
+            case HARMING: return prefix + "POTION_OF_HARMING";
+            case STRONG_HARMING: return prefix + "POTION_OF_HARMING_2";
 
-            case HARMING: return "dp1" + suffix;
-            case STRONG_HARMING: return "dp2" + suffix;
+            case POISON: return prefix + "POTION_OF_POISON";
+            case LONG_POISON: return prefix + "POTION_OF_POISON_LONG";
+            case STRONG_POISON: return prefix + "POTION_OF_POISON_2";
 
-            case POISON: return "pp1" + suffix;
-            case LONG_POISON: return "pp1e" + suffix;
-            case STRONG_POISON: return "pp2" + suffix;
+            case REGENERATION: return prefix + "POTION_OF_REGENERATION";
+            case LONG_REGENERATION: return prefix + "POTION_OF_REGENERATION_LONG";
+            case STRONG_REGENERATION: return prefix + "POTION_OF_REGENERATION_2";
 
-            case REGENERATION: return "rp1" + suffix;
-            case LONG_REGENERATION: return "rp1e" + suffix;
-            case STRONG_REGENERATION: return "rp2" + suffix;
+            case STRENGTH: return prefix + "POTION_OF_STRENGTH";
+            case LONG_STRENGTH: return prefix + "POTION_OF_STRENGTH_LONG";
+            case STRONG_STRENGTH: return prefix + "POTION_OF_STRENGTH_2";
 
-            case STRENGTH: return "strp1" + suffix;
-            case LONG_STRENGTH: return "strp1e" + suffix;
-            case STRONG_STRENGTH: return "strp2" + suffix;
+            case WEAKNESS: return prefix + "POTION_OF_WEAKNESS";
+            case LONG_WEAKNESS: return prefix + "POTION_OF_WEAKNESS_LONG";
 
-            case WEAKNESS: return "wp1" + suffix;
-            case LONG_WEAKNESS: return "wp1e" + suffix;
+            case LUCK: return prefix + "POTION_OF_LUCK";
 
-            case LUCK: return "luckp" + suffix;
+            case TURTLE_MASTER: return prefix + "POTION_OF_TURTLE_MASTER";
+            case LONG_TURTLE_MASTER: return prefix + "POTION_OF_TURTLE_MASTER_LONG";
+            case STRONG_TURTLE_MASTER: return prefix + "POTION_OF_TURTLE_MASTER_2";
 
-            case TURTLE_MASTER: return "tmp1" + suffix;
-            case LONG_TURTLE_MASTER: return "tmp1e" + suffix;
-            case STRONG_TURTLE_MASTER: return "tmp2" + suffix;
+            case SLOW_FALLING: return prefix + "POTION_OF_SLOW_FALLING";
+            case LONG_SLOW_FALLING: return prefix + "POTION_OF_SLOW_FALLING_LONG";
 
-            case SLOW_FALLING: return "sfp1" + suffix;
-            case LONG_SLOW_FALLING: return "sfp1e" + suffix;
-
-            case WIND_CHARGED: return "windp" + suffix;
-            case WEAVING: return "weavingp" + suffix;
-            case OOZING: return "oozingp" + suffix;
-            case INFESTED: return "infestedp" + suffix;
+            case WIND_CHARGED: return prefix + "POTION_OF_WIND_CHARGED";
+            case WEAVING: return prefix + "POTION_OF_WEAVING";
+            case OOZING: return prefix + "POTION_OF_OOZING";
+            case INFESTED: return prefix + "POTION_OF_INFESTATION";
 
             default:
-                return type.name().toLowerCase() + suffix;
+                return prefix + "POTION_OF_" + type.name();
         }
     }
+
 
     public static ItemStack getItemFromId(String id) {
         // Check if it's a known potion ID
@@ -148,70 +145,70 @@ public class ItemUtil {
     }
 
     public static PotionType getPotionTypeFromId(String id) {
-        boolean splash = id.endsWith("s");
-        String baseId = splash ? id.substring(0, id.length() - 1) : id;
+        boolean splash = id.startsWith("SPLASH_");
+        String baseId = splash ? id.substring("SPLASH_".length()) : id;
 
         switch (baseId) {
-            case "wb": return PotionType.WATER;
+            case "POTION_OF_WATER": return PotionType.WATER;
 
-            case "nvp": return PotionType.NIGHT_VISION;
-            case "nvpe": return PotionType.LONG_NIGHT_VISION;
+            case "POTION_OF_NIGHT_VISION": return PotionType.NIGHT_VISION;
+            case "POTION_OF_NIGHT_VISION_LONG": return PotionType.LONG_NIGHT_VISION;
 
-            case "invp": return PotionType.INVISIBILITY;
-            case "invpe": return PotionType.LONG_INVISIBILITY;
+            case "POTION_OF_INVISIBILITY": return PotionType.INVISIBILITY;
+            case "POTION_OF_INVISIBILITY_LONG": return PotionType.LONG_INVISIBILITY;
 
-            case "ljp1": return PotionType.LEAPING;
-            case "ljp1e": return PotionType.LONG_LEAPING;
-            case "ljp2": return PotionType.STRONG_LEAPING;
+            case "POTION_OF_LEAPING": return PotionType.LEAPING;
+            case "POTION_OF_LEAPING_LONG": return PotionType.LONG_LEAPING;
+            case "POTION_OF_LEAPING_2": return PotionType.STRONG_LEAPING;
 
-            case "frp1": return PotionType.FIRE_RESISTANCE;
-            case "frp1e": return PotionType.LONG_FIRE_RESISTANCE;
+            case "POTION_OF_FIRE_RESISTANCE": return PotionType.FIRE_RESISTANCE;
+            case "POTION_OF_FIRE_RESISTANCE_LONG": return PotionType.LONG_FIRE_RESISTANCE;
 
-            case "swp1": return PotionType.SWIFTNESS;
-            case "swp1e": return PotionType.LONG_SWIFTNESS;
-            case "swp2": return PotionType.STRONG_SWIFTNESS;
+            case "POTION_OF_SWIFTNESS": return PotionType.SWIFTNESS;
+            case "POTION_OF_SWIFTNESS_LONG": return PotionType.LONG_SWIFTNESS;
+            case "POTION_OF_SWIFTNESS_2": return PotionType.STRONG_SWIFTNESS;
 
-            case "slp1": return PotionType.SLOWNESS;
-            case "slp1e": return PotionType.LONG_SLOWNESS;
-            case "slp2": return PotionType.STRONG_SLOWNESS;
+            case "POTION_OF_SLOWNESS": return PotionType.SLOWNESS;
+            case "POTION_OF_SLOWNESS_LONG": return PotionType.LONG_SLOWNESS;
+            case "POTION_OF_SLOWNESS_2": return PotionType.STRONG_SLOWNESS;
 
-            case "wbp1": return PotionType.WATER_BREATHING;
-            case "wbp1e": return PotionType.LONG_WATER_BREATHING;
+            case "POTION_OF_WATER_BREATHING": return PotionType.WATER_BREATHING;
+            case "POTION_OF_WATER_BREATHING_LONG": return PotionType.LONG_WATER_BREATHING;
 
-            case "hp1": return PotionType.HEALING;
-            case "hp2": return PotionType.STRONG_HEALING;
+            case "POTION_OF_HEALING": return PotionType.HEALING;
+            case "POTION_OF_HEALING_2": return PotionType.STRONG_HEALING;
 
-            case "dp1": return PotionType.HARMING;
-            case "dp2": return PotionType.STRONG_HARMING;
+            case "POTION_OF_HARMING": return PotionType.HARMING;
+            case "POTION_OF_HARMING_2": return PotionType.STRONG_HARMING;
 
-            case "pp1": return PotionType.POISON;
-            case "pp1e": return PotionType.LONG_POISON;
-            case "pp2": return PotionType.STRONG_POISON;
+            case "POTION_OF_POISON": return PotionType.POISON;
+            case "POTION_OF_POISON_LONG": return PotionType.LONG_POISON;
+            case "POTION_OF_POISON_2": return PotionType.STRONG_POISON;
 
-            case "rp1": return PotionType.REGENERATION;
-            case "rp1e": return PotionType.LONG_REGENERATION;
-            case "rp2": return PotionType.STRONG_REGENERATION;
+            case "POTION_OF_REGENERATION": return PotionType.REGENERATION;
+            case "POTION_OF_REGENERATION_LONG": return PotionType.LONG_REGENERATION;
+            case "POTION_OF_REGENERATION_2": return PotionType.STRONG_REGENERATION;
 
-            case "strp1": return PotionType.STRENGTH;
-            case "strp1e": return PotionType.LONG_STRENGTH;
-            case "strp2": return PotionType.STRONG_STRENGTH;
+            case "POTION_OF_STRENGTH": return PotionType.STRENGTH;
+            case "POTION_OF_STRENGTH_LONG": return PotionType.LONG_STRENGTH;
+            case "POTION_OF_STRENGTH_2": return PotionType.STRONG_STRENGTH;
 
-            case "wp1": return PotionType.WEAKNESS;
-            case "wp1e": return PotionType.LONG_WEAKNESS;
+            case "POTION_OF_WEAKNESS": return PotionType.WEAKNESS;
+            case "POTION_OF_WEAKNESS_LONG": return PotionType.LONG_WEAKNESS;
 
-            case "lp": return PotionType.LUCK;
+            case "POTION_OF_LUCK": return PotionType.LUCK;
 
-            case "tmp1": return PotionType.TURTLE_MASTER;
-            case "tmp1e": return PotionType.LONG_TURTLE_MASTER;
-            case "tmp2": return PotionType.STRONG_TURTLE_MASTER;
+            case "POTION_OF_TURTLE_MASTER": return PotionType.TURTLE_MASTER;
+            case "POTION_OF_TURTLE_MASTER_LONG": return PotionType.LONG_TURTLE_MASTER;
+            case "POTION_OF_TURTLE_MASTER_2": return PotionType.STRONG_TURTLE_MASTER;
 
-            case "sfp1": return PotionType.SLOW_FALLING;
-            case "sfp1e": return PotionType.LONG_SLOW_FALLING;
+            case "POTION_OF_SLOW_FALLING": return PotionType.SLOW_FALLING;
+            case "POTION_OF_SLOW_FALLING_LONG": return PotionType.LONG_SLOW_FALLING;
 
-            case "wcp": return PotionType.WIND_CHARGED;
-            case "wvp": return PotionType.WEAVING;
-            case "ozp": return PotionType.OOZING;
-            case "ifp": return PotionType.INFESTED;
+            case "POTION_OF_WIND_CHARGED": return PotionType.WIND_CHARGED;
+            case "POTION_OF_WEAVING": return PotionType.WEAVING;
+            case "POTION_OF_OOZING": return PotionType.OOZING;
+            case "POTION_OF_INFESTATION": return PotionType.INFESTED;
 
             default: return null;
         }
@@ -242,7 +239,7 @@ public class ItemUtil {
 
         for (String id : baseIds) {
             materialNames.add(id);
-            materialNames.add(id + "s"); // Add splash variant
+            materialNames.add("SPLASH_" + id); // Add splash variant
         }
 
         return materialNames;
