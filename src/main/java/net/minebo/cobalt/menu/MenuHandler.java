@@ -23,19 +23,14 @@ public class MenuHandler {
 
     public static Map<String, Menu> playerMenus = new HashMap<>();
 
-    public static Button BLANK_BUTTON;
-    public static ItemStack BLANK_BUTTON_ITEM;
-
     public static void init(JavaPlugin plugin) {
+        MenuHandler.plugin = plugin;
+
         Bukkit.getPluginManager().registerEvents(new ButtonListener(), plugin);
         Bukkit.getPluginManager().registerEvents(new MenuListener(), plugin);
 
-        MenuHandler.plugin = plugin;
-
         currentlyOpenedMenus = new HashMap();
         checkTasks = new HashMap();
-
-        Button BLANK_BUTTON = new Button();
     }
 
     public static void startAutoUpdate(Player player, Menu menu) {

@@ -4,6 +4,7 @@ import net.minebo.cobalt.menu.MenuHandler;
 import net.minebo.cobalt.menu.construct.Button;
 import net.minebo.cobalt.menu.construct.Menu;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,30 +18,30 @@ public class ButtonListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player)) return;
 
         Player player = (Player) event.getWhoClicked();
-        Inventory clickedInventory = event.getInventory();
-
         String playerName = player.getName();
 
-        if (!MenuHandler.currentlyOpenedMenus.containsKey(playerName)) return;
+        Inventory clickedInventory = event.getClickedInventory();
+        if (clickedInventory == null) return;
 
-        Inventory menuInventory = MenuHandler.currentlyOpenedMenus.get(playerName);
+        Inventory topInventory = event.getView().getTopInventory();
 
-        if (!clickedInventory.equals(menuInventory)) return;
+        if (!clickedInventory.equals(topInventory)) return;
 
-        event.setCancelled(true);
-
-        int slot = event.getRawSlot();
         Menu menu = MenuHandler.getPlayerMenu(playerName);
         if (menu == null) return;
 
+        event.setCancelled(true);
+
+        int slot = event.getSlot();
         Button button = menu.buttons.get(slot);
 
         if (button != null) {
-            button.onClick(player);
+            button.onClick(event.getClick(), player);
 
             if (menu.updateAfterClick) {
                 MenuHandler.updateMenu(player, menu);
             }
         }
     }
+
 }
