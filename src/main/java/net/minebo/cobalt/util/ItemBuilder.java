@@ -4,29 +4,32 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
 public class ItemBuilder {
 
     public ItemStack itemStack;
+    public ItemMeta itemMeta;
 
     public ItemBuilder(Material material) {
         itemStack = new ItemStack(material);
+        itemMeta = itemStack.getItemMeta();
     }
 
     public ItemBuilder setName(String name) {
-        itemStack.getItemMeta().setDisplayName(ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name)));
+        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name)));
         return this;
     }
 
     public ItemBuilder setLore(String... lore) {
-        itemStack.getItemMeta().setLore(List.of(lore));
+        itemMeta.setLore(List.of(lore));
         return this;
     }
 
     public ItemBuilder addEnchantment(Enchantment enchantment, int level) {
-        itemStack.getItemMeta().addEnchant(enchantment, level, true);
+        itemMeta.addEnchant(enchantment, level, true);
         return this;
     }
 
@@ -36,6 +39,7 @@ public class ItemBuilder {
     }
 
     public ItemStack build() {
+        itemStack.setItemMeta(itemMeta);
         return itemStack;
     }
 
