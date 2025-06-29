@@ -39,12 +39,12 @@ public class Menu {
         return this;
     }
 
-    public Menu fillEmpty(Material material){
+    public Menu fillEmpty(Material material, Boolean hideName){
         Integer i = 0;
 
         while (i <= size-1) {
             if(!buttons.containsKey(i)){
-                buttons.put(i, new Button().setMaterial(material));
+                buttons.put(i, (hideName) ? new Button().setMaterial(material).setName("") : new Button().setMaterial(material));
             }
 
             i++;
