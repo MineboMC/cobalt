@@ -30,6 +30,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setSize(Integer size) {
+        itemStack.setAmount(size);
+        return this;
+    }
+
     public ItemStack build() {
         return itemStack;
     }
