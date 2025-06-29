@@ -27,8 +27,8 @@ public class Button {
     private HashMap<ClickType, List<Consumer<Player>>> clickActions;
 
     public Button() {
-        this.name = "Default Title";
-        this.lines = () -> Arrays.asList("Default", "Lines");
+        this.name = "";
+        this.lines = Arrays::asList;
         this.material = Material.BOOK;
         this.amount = 1;
         clickActions = new HashMap<>();

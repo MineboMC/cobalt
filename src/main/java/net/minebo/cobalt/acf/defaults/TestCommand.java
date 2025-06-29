@@ -7,7 +7,7 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Syntax;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
-import net.minebo.cobalt.menu.impl.TestingMenu;
+import net.minebo.cobalt.menu.impl.menu.TestingMenu;
 import org.bukkit.entity.Player;
 
 public class TestCommand extends BaseCommand {

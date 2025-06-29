@@ -1,4 +1,4 @@
-package net.minebo.cobalt.menu.impl;
+package net.minebo.cobalt.menu.impl.menu;
 
 import net.minebo.cobalt.menu.construct.Button;
 import net.minebo.cobalt.menu.construct.Menu;

@@ -2,6 +2,7 @@ package net.minebo.cobalt.menu.construct;
 
 import net.minebo.cobalt.menu.MenuHandler;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -30,6 +31,25 @@ public class Menu {
 
     public Menu setSize(Integer size) {
         this.size = size;
+        return this;
+    }
+
+    public Menu setButton(Integer slot, Button button) {
+        buttons.put(slot, button);
+        return this;
+    }
+
+    public Menu fillEmpty(Material material){
+        Integer i = 0;
+
+        while (i <= size-1) {
+            if(!buttons.containsKey(i)){
+                buttons.put(i, new Button().setMaterial(material));
+            }
+
+            i++;
+        }
+
         return this;
     }
 
