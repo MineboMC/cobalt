@@ -23,7 +23,8 @@ public class ScoreboardThread {
             try {
                Thread.sleep(20L);
             } catch (InterruptedException e) {
-               throw new RuntimeException(e);
+               e.printStackTrace();
+               return;
             }
          }
       }, "Cobalt - Scoreboard Thread");

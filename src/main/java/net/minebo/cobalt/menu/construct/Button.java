@@ -20,22 +20,22 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class Button {
 
-    public String name;
+    public Supplier<String> name;
     private Supplier<List<String>> lines;
-    public Material material;
-    public Integer amount;
+    public Supplier<Material> material;
+    public Supplier<Integer> amount;
     private HashMap<ClickType, List<Consumer<Player>>> clickActions;
 
     public Button() {
-        this.name = "";
+        this.name = () -> "";
         this.lines = Arrays::asList;
-        this.material = Material.BOOK;
-        this.amount = 1;
+        this.material = () -> Material.BOOK;
+        this.amount = () -> 1;
         clickActions = new HashMap<>();
     }
 
     public Button setName(String name) {
-        this.name = ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name));
+        this.name = () -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name));
         return this;
     }
 
@@ -47,12 +47,12 @@ public class Button {
     }
 
     public Button setMaterial(Material material) {
-        this.material = material;
+        this.material = () -> material;
         return this;
     }
 
     public Button setAmount(Integer amount) {
-        this.amount = amount;
+        this.amount = () -> amount;
         return this;
     }
 
@@ -62,14 +62,14 @@ public class Button {
     }
 
     public ItemStack build() {
-        ItemStack item = new ItemStack(material);
+        ItemStack item = new ItemStack(material.get());
 
-        item.setAmount(amount);
+        item.setAmount(amount.get());
         item.setLore(lines.get().stream().map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line))).collect(Collectors.toList()));
 
         ItemMeta meta = item.getItemMeta();
 
-        meta.setDisplayName(name);
+        meta.setDisplayName(name.get());
         item.setItemMeta(meta);
 
         return item;

@@ -1,5 +1,7 @@
 package net.minebo.cobalt.util;
 
+import org.bukkit.ChatColor;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +22,10 @@ public class ColorUtil {
         }
         matcher.appendTail(buffer);
         return buffer.toString();
+    }
+
+    public static String translateColors(String message) {
+        return ChatColor.translateAlternateColorCodes('&', translateHexColors(message));
     }
 
 }
