@@ -17,11 +17,10 @@ public class TestingMenu extends Menu {
 
         buttons.put(0, new Button()
                 .setName("#F4D654&lT#F6D552&le#F7D451&ls#F9D34F&lt#FAD14E&li#FCD04C&ln#FDCF4B&lg #FFCB3D&lB#FFC731&lu#FFC425&lt#FFC118&lt#FFBD0C&lo#FFBA00&ln")
-                .setLines(() -> Arrays.asList(
+                .setLines(
                         "&aUpdating",
                         "&eButton",
                         "&dCurrent System Milis: &f" + System.currentTimeMillis()
-                        )
                 )
 
                 .setMaterial(Material.BOOK)
