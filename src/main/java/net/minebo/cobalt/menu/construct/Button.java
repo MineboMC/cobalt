@@ -9,13 +9,9 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class Button {
@@ -28,21 +24,34 @@ public class Button {
 
     public Button() {
         this.name = () -> "";
-        this.lines = Arrays::asList;
+        this.lines = ArrayList::new;
         this.material = () -> Material.BOOK;
         this.amount = () -> 1;
-        clickActions = new HashMap<>();
+        this.clickActions = new HashMap<>();
     }
 
+    // --- Fluent setters ---
     public Button setName(String name) {
         this.name = () -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name));
         return this;
     }
+    public Button setName(Supplier<String> nameSupplier) {
+        this.name = () -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(nameSupplier.get()));
+        return this;
+    }
 
+    // For static lines
     public Button setLines(String... dynamicLines) {
-        this.lines = () -> Arrays.asList(dynamicLines).stream()
+        this.lines = () -> Arrays.stream(dynamicLines)
                 .map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line)))
-                .collect(Collectors.toList());
+                .toList();
+        return this;
+    }
+    // For dynamic lines
+    public Button setLines(Supplier<List<String>> linesSupplier) {
+        this.lines = () -> linesSupplier.get().stream()
+                .map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line)))
+                .toList();
         return this;
     }
 
@@ -50,9 +59,17 @@ public class Button {
         this.material = () -> material;
         return this;
     }
+    public Button setMaterial(Supplier<Material> materialSupplier) {
+        this.material = materialSupplier;
+        return this;
+    }
 
     public Button setAmount(Integer amount) {
         this.amount = () -> amount;
+        return this;
+    }
+    public Button setAmount(Supplier<Integer> amountSupplier) {
+        this.amount = amountSupplier;
         return this;
     }
 
@@ -61,17 +78,15 @@ public class Button {
         return this;
     }
 
+    // --- Main build method ---
     public ItemStack build() {
-        ItemStack item = new ItemStack(material.get());
-
-        item.setAmount(amount.get());
-        item.setLore(lines.get().stream().map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line))).collect(Collectors.toList()));
-
+        ItemStack item = new ItemStack(material.get(), amount.get());
         ItemMeta meta = item.getItemMeta();
-
-        meta.setDisplayName(name.get());
-        item.setItemMeta(meta);
-
+        if (meta != null) {
+            meta.setDisplayName(name.get());
+            meta.setLore(lines.get());
+            item.setItemMeta(meta);
+        }
         return item;
     }
 
@@ -83,5 +98,4 @@ public class Button {
             }
         }
     }
-
 }
