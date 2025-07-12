@@ -35,6 +35,8 @@ public class ButtonListener implements Listener {
         int slot = event.getSlot();
         Button button = menu.buttonSuppliers.get(slot).get();
 
+        if (!menu.buttonSuppliers.containsKey(slot)) return;
+
         if (button != null) {
             button.onClick(event.getClick(), player);
 
