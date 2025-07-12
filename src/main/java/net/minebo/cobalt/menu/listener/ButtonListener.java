@@ -33,7 +33,7 @@ public class ButtonListener implements Listener {
         event.setCancelled(true);
 
         int slot = event.getSlot();
-        Button button = menu.buttons.get(slot);
+        Button button = menu.buttonSuppliers.get(slot).get();
 
         if (button != null) {
             button.onClick(event.getClick(), player);

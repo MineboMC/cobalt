@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class MenuHandler {
 
@@ -58,9 +59,9 @@ public class MenuHandler {
         Inventory inv = currentlyOpenedMenus.get(player.getName());
 
         if (inv == null) return;
-
-        for (Map.Entry<Integer, Button> entry : menu.buttons.entrySet()) {
-            inv.setItem(entry.getKey(), entry.getValue().build());
+        for (Map.Entry<Integer, Supplier<Button>> entry : menu.buttonSuppliers.entrySet()) {
+            Button freshButton = entry.getValue().get();
+            inv.setItem(entry.getKey(), freshButton.build());
         }
 
         player.updateInventory();
