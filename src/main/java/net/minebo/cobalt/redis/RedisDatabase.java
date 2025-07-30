@@ -48,9 +48,9 @@ public class RedisDatabase {
    public Object runRedisCommand(JedisPool pool, RedisCommand redisCommand) {
       Jedis jedis = pool.getResource();
 
-      String result;
+      Object result;
       try {
-         result = (String) redisCommand.execute(jedis);
+         result = redisCommand.execute(jedis);
       } catch (Throwable var8) {
          if (jedis != null) {
             try {
@@ -59,7 +59,6 @@ public class RedisDatabase {
                var8.addSuppressed(var7);
             }
          }
-
          throw var8;
       }
 
