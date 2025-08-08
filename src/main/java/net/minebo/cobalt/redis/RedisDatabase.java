@@ -91,7 +91,7 @@ public class RedisDatabase {
 
       try {
          String var10000 = packet.getClass().getName();
-         String encodedPacket = var10000 + "||" + Gson.GSON.toJson((Object)packet);
+         String encodedPacket = var10000 + "||" + Gson.GSON.toJson(packet);
          jedis.publish("Cobalt:Global", encodedPacket);
       } catch (Throwable var12) {
          var12.printStackTrace();
