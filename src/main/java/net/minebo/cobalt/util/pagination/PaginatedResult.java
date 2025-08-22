@@ -1,19 +1,17 @@
 package net.minebo.cobalt.util.pagination;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class PaginatedResult {
+public class PaginatedResult<T> {
 
-    private final LinkedHashMap<String, Integer> ranked;
+    private final LinkedHashMap<String, T> ranked;
     private final int resultsPerPage;
 
-    public PaginatedResult(HashMap<String, Integer> input, int resultsPerPage) {
+    public PaginatedResult(HashMap<String, T> input, int resultsPerPage, Comparator<Map.Entry<String, T>> comparator) {
         this.ranked = input.entrySet()
                 .stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .sorted(comparator)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
@@ -23,7 +21,7 @@ public class PaginatedResult {
         this.resultsPerPage = resultsPerPage;
     }
 
-    public LinkedHashMap<String, Integer> getPage(int page) {
+    public LinkedHashMap<String, T> getPage(int page) {
         int startIndex = (page - 1) * resultsPerPage;
         return ranked.entrySet()
                 .stream()
@@ -49,8 +47,7 @@ public class PaginatedResult {
         return resultsPerPage;
     }
 
-    public LinkedHashMap<String, Integer> getRanked() {
+    public LinkedHashMap<String, T> getRanked() {
         return ranked;
     }
-
 }
