@@ -1,5 +1,6 @@
 package net.minebo.cobalt.menu.construct;
 
+import com.github.retrooper.packetevents.protocol.potion.Potion;
 import lombok.AllArgsConstructor;
 import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.ChatColor;
@@ -8,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -21,6 +24,9 @@ public class Button {
     public Supplier<Material> material;
     public Supplier<Integer> amount;
     private HashMap<ClickType, List<Consumer<Player>>> clickActions;
+
+    // Special Cases
+    public Supplier<PotionType> potionType;
 
     public Button() {
         this.name = () -> "";
@@ -47,6 +53,7 @@ public class Button {
                 .toList();
         return this;
     }
+
     // For dynamic lines
     public Button setLines(Supplier<List<String>> linesSupplier) {
         this.lines = () -> linesSupplier.get().stream()
@@ -59,6 +66,7 @@ public class Button {
         this.material = () -> material;
         return this;
     }
+
     public Button setMaterial(Supplier<Material> materialSupplier) {
         this.material = materialSupplier;
         return this;
@@ -68,6 +76,7 @@ public class Button {
         this.amount = () -> amount;
         return this;
     }
+
     public Button setAmount(Supplier<Integer> amountSupplier) {
         this.amount = amountSupplier;
         return this;
@@ -78,10 +87,26 @@ public class Button {
         return this;
     }
 
+    public Button setPotionType(PotionType potionType) {
+        this.potionType = () -> potionType;
+        return this;
+    }
+
+    public Button setPotionType(Supplier<PotionType> potionType) {
+        this.potionType = potionType;
+        return this;
+    }
+
+
     // --- Main build method ---
     public ItemStack build() {
         ItemStack item = new ItemStack(material.get(), amount.get());
         ItemMeta meta = item.getItemMeta();
+
+        if(meta instanceof PotionMeta) {
+            ((PotionMeta) meta).setBasePotionType(potionType.get());
+        }
+
         if (meta != null) {
             meta.setDisplayName(name.get());
             meta.setLore(lines.get());
