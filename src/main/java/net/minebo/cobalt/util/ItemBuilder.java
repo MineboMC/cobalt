@@ -8,6 +8,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 import java.util.List;
 
@@ -56,6 +58,13 @@ public class ItemBuilder {
     public ItemBuilder setColor(Color color) {
         LeatherArmorMeta meta = (LeatherArmorMeta) itemMeta.clone();
         meta.setColor(color);
+        itemStack.setItemMeta(meta);
+        return this;
+    }
+
+    public ItemBuilder setPotionType(PotionType potionType) {
+        PotionMeta meta = (PotionMeta) itemMeta.clone();
+        meta.setBasePotionType(potionType);
         itemStack.setItemMeta(meta);
         return this;
     }
