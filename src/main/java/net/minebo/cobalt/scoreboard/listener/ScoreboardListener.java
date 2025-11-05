@@ -15,6 +15,9 @@ public class ScoreboardListener implements Listener {
 
    @EventHandler
    public void onPlayerQuit(PlayerQuitEvent event) {
-      ScoreboardHandler.boards.remove(event.getPlayer().getUniqueId());
+      Board board = ScoreboardHandler.boards.remove(event.getPlayer().getUniqueId());
+      if (board != null) {
+         board.delete();
+      }
    }
 }
