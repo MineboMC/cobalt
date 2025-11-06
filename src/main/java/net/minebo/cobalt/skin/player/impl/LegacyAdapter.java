@@ -21,7 +21,7 @@ public class LegacyAdapter implements IPlayerAdapter {
       if (!iterator.hasNext()) {
          return SkinAPI.DEFAULT;
       } else {
-         WrappedSignedProperty prop = (WrappedSignedProperty)iterator.next();
+         WrappedSignedProperty prop = iterator.next();
          return new CachedSkin(player.getName(), prop.getValue(), prop.getSignature());
       }
    }

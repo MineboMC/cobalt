@@ -1,6 +1,5 @@
 package net.minebo.cobalt.util;
 
-import com.comphenix.protocol.ProtocolLibrary;
 import lombok.experimental.UtilityClass;
 import org.bukkit.entity.Player;
 
@@ -8,12 +7,12 @@ import org.bukkit.entity.Player;
 public final class VersionUtils {
 
     /**
-     * Gets the player's protocol version using ProtocolLib.
+     * Gets the player's protocol version through Paper's API.
      * @param player The player.
      * @return The protocol version as an integer.
      */
     public static int getPlayerProtocolVersion(Player player) {
-        return ProtocolLibrary.getProtocolManager().getProtocolVersion(player);
+        return player.getProtocolVersion();
     }
 
     /**
