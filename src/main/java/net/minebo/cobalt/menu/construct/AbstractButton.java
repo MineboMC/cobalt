@@ -35,7 +35,7 @@ public class AbstractButton extends Button {
         return 0;
     }
 
-    public HashMap<ClickType, List<Consumer<Player>>> getClickActions(Player player) {
+    public HashMap<ClickType, List<Consumer<Player>>> getClickActions() {
         return null;
     }
 
@@ -50,6 +50,16 @@ public class AbstractButton extends Button {
             item.setItemMeta(meta);
         }
         return item;
+    }
+
+    @Override
+    public void onClick(ClickType clickType, Player player) {
+        List<Consumer<Player>> actions = getClickActions().get(clickType);
+        if (actions != null) {
+            for (Consumer<Player> action : actions) {
+                action.accept(player);
+            }
+        }
     }
 
 }
