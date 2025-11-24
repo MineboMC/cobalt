@@ -2,6 +2,7 @@ package net.minebo.cobalt.acf;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandCompletions;
+import co.aikar.commands.CommandManager;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.commands.contexts.ContextResolver;
 import java.lang.reflect.Modifier;
@@ -10,7 +11,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanner;
 
 public class ACFCommandController {
-   public static PaperCommandManager commandController;
+   public static CommandManager commandController;
 
    public static void registerCompletion(String id, CommandCompletions.CommandCompletionHandler handler) {
       commandController.getCommandCompletions().registerCompletion(id, handler);
