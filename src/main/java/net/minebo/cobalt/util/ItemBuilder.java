@@ -72,6 +72,15 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setHexColor(String color) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta instanceof LeatherArmorMeta leatherMeta) {
+            leatherMeta.setColor(DyeUtil.fromHex(color));
+            itemStack.setItemMeta(leatherMeta);
+        }
+        return this;
+    }
+
     public ItemBuilder setPotionType(PotionType potionType) {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta instanceof PotionMeta potionMeta) {
