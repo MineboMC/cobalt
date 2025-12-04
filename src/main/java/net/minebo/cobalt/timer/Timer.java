@@ -5,13 +5,14 @@ import lombok.Data;
 import net.minebo.cobalt.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public abstract class Timer {
+public abstract class Timer implements Listener {
     protected final Player player;
     protected final int durationSeconds;
     protected final Map<UUID, Task> taskMap;
@@ -23,6 +24,8 @@ public abstract class Timer {
         this.durationSeconds = durationSeconds;
         this.taskMap = taskMap;
         this.plugin = plugin;
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     public void start() {
