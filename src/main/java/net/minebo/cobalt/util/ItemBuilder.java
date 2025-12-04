@@ -16,25 +16,29 @@ import java.util.List;
 public class ItemBuilder {
 
     public ItemStack itemStack;
-    public ItemMeta itemMeta;
 
     public ItemBuilder(Material material) {
         itemStack = new ItemStack(material);
-        itemMeta = itemStack.getItemMeta();
     }
 
     public ItemBuilder setName(String name) {
-        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name)));
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name)));
+        itemStack.setItemMeta(meta);
         return this;
     }
 
     public ItemBuilder setLore(String... lore) {
-        itemMeta.setLore(List.of(lore));
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.setLore(List.of(lore));
+        itemStack.setItemMeta(meta);
         return this;
     }
 
     public ItemBuilder addEnchantment(Enchantment enchantment, int level) {
-        itemMeta.addEnchant(enchantment, level, true);
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.addEnchant(enchantment, level, true);
+        itemStack.setItemMeta(meta);
         return this;
     }
 
@@ -44,34 +48,41 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setUnbreakable(boolean unbreakable) {
-        itemMeta.setUnbreakable(unbreakable);
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.setUnbreakable(unbreakable);
+        itemStack.setItemMeta(meta);
         return this;
     }
 
     public ItemBuilder setDyeColor(DyeColor dyeColor) {
-        LeatherArmorMeta meta = (LeatherArmorMeta) itemMeta.clone();
-        meta.setColor(dyeColor.getColor()); // getColor() returns org.bukkit.Color
-        itemStack.setItemMeta(meta);
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta instanceof LeatherArmorMeta leatherMeta) {
+            leatherMeta.setColor(dyeColor.getColor());
+            itemStack.setItemMeta(leatherMeta);
+        }
         return this;
     }
 
     public ItemBuilder setColor(Color color) {
-        LeatherArmorMeta meta = (LeatherArmorMeta) itemMeta.clone();
-        meta.setColor(color);
-        itemStack.setItemMeta(meta);
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta instanceof LeatherArmorMeta leatherMeta) {
+            leatherMeta.setColor(color);
+            itemStack.setItemMeta(leatherMeta);
+        }
         return this;
     }
 
     public ItemBuilder setPotionType(PotionType potionType) {
-        PotionMeta meta = (PotionMeta) itemMeta.clone();
-        meta.setBasePotionType(potionType);
-        itemStack.setItemMeta(meta);
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta instanceof PotionMeta potionMeta) {
+            potionMeta.setBasePotionType(potionType);
+            itemStack.setItemMeta(potionMeta);
+        }
         return this;
     }
 
     public ItemStack build() {
-        itemStack.setItemMeta(itemMeta);
+        // Just return the underlying itemStack; all properties are already set
         return itemStack;
     }
-
 }

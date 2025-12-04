@@ -40,10 +40,10 @@ public class ButtonListener implements Listener {
 
         if (button != null) {
             button.onClick(event.getClick(), player);
+        }
 
-            if (menu.updateAfterClick) {
-                MenuHandler.updateMenu(player, menu);
-            }
+        if (menu.updateAfterClick) {
+            MenuHandler.updateMenu(player, menu);
         }
     }
 
