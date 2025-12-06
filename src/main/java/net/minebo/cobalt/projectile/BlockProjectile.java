@@ -64,8 +64,9 @@ public class BlockProjectile implements Listener {
         new BukkitRunnable() {
             int ticks = 0;
             Location prevPos = projectile.getLocation().clone();
-
-            // Approximated bounding box size for a player (X, Y, Z).
+            // Use a larger projectile hitbox (radius 1.5 = 3x3x3 box)
+            final double PROJECTILE_RADIUS_X = 1.5, PROJECTILE_RADIUS_Y = 1.5, PROJECTILE_RADIUS_Z = 1.5;
+            // Player hitbox for self-hit prevention
             final double PLAYER_WIDTH = 0.6, PLAYER_HEIGHT = 1.8, PLAYER_DEPTH = 0.6;
 
             @Override
@@ -80,18 +81,17 @@ public class BlockProjectile implements Listener {
                 ticks++;
 
                 Location currPos = projectile.getLocation();
-                BoundingBox projBB = BoundingBox.of(currPos, 0.25, 0.25, 0.25); // FB block bounding box
+                BoundingBox projBB = BoundingBox.of(currPos, PROJECTILE_RADIUS_X, PROJECTILE_RADIUS_Y, PROJECTILE_RADIUS_Z);
 
-                // Player bounding box for self-hit prevention
-                BoundingBox shooterBB = BoundingBox.of(
-                        shooter.getLocation(), PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_DEPTH);
+                // Self-hit bounding box (optional)
+                BoundingBox shooterBB = BoundingBox.of(shooter.getLocation(), PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_DEPTH);
 
-                // Scan 3x3x3 area around projectile
+                // Block collision with expanded projectile hitbox (3x3x3 area)
                 int px = currPos.getBlockX();
                 int py = currPos.getBlockY();
                 int pz = currPos.getBlockZ();
 
-                for (int dx = -1; dx <= 1; dx++) {
+                outer: for (int dx = -1; dx <= 1; dx++) {
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dz = -1; dz <= 1; dz++) {
                             Block block = currPos.getWorld().getBlockAt(px + dx, py + dy, pz + dz);
@@ -99,17 +99,17 @@ public class BlockProjectile implements Listener {
                             Material mat = data.getMaterial();
                             if (mat.isAir()) continue;
 
-                            // Use Paper collision shapes if present
+                            // Try Paper collision shapes
                             try {
                                 List<BoundingBox> shapes = block.getCollisionShape() != null
-                                        ? block.getCollisionShape().getBoundingBoxes().stream().toList() : Collections.emptyList();
+                                        ? block.getCollisionShape().getBoundingBoxes().stream().toList() : java.util.Collections.emptyList();
 
                                 if (!shapes.isEmpty()) {
                                     for (BoundingBox shapeBB : shapes) {
                                         BoundingBox worldBB = shapeBB.shift(block.getX(), block.getY(), block.getZ());
                                         if (worldBB.overlaps(projBB)) {
                                             // Don't hit the shooter if bounding boxes overlap
-                                            if (shooterBB.overlaps(projBB)) continue;
+                                            if (shooterBB.overlaps(projBB)) continue outer;
                                             Bukkit.getPluginManager().callEvent(
                                                     new BlockProjectileHitEvent(projectile, shooter, null, currPos)
                                             );
@@ -125,7 +125,7 @@ public class BlockProjectile implements Listener {
                             }
 
                             // Full block occlusion fallback
-                            if ((data.isOccluding() && mat.isSolid()) || true) {
+                            if (data.isOccluding() && mat.isSolid()) {
                                 BoundingBox blockBB = BoundingBox.of(block);
                                 if (blockBB.overlaps(projBB)) {
                                     if (shooterBB.overlaps(projBB)) continue;
@@ -141,17 +141,23 @@ public class BlockProjectile implements Listener {
                     }
                 }
 
-                // Raytrace for entities (wait >= 2 ticks to avoid instant collision at launch)
+                // Entity collision (expand hitbox!)
                 if (ticks > 2) {
-                    RayTraceResult entityHit = currPos.getWorld().rayTraceEntities(
-                            prevPos, velocity.normalize(), velocity.length(),
-                            entity -> entity instanceof Player && !entity.equals(shooter)
-                    );
-                    if (entityHit != null && entityHit.getHitEntity() != null && !entityHit.getHitEntity().equals(shooter)) {
-                        Location hitLoc = entityHit.getHitPosition().toLocation(projectile.getWorld());
-                        projectile.teleport(hitLoc);
+                    // Use a "big projectile box" for area hit similar to getNearbyEntities(1.5, 1.5, 1.5)
+                    for (Entity entity : projectile.getWorld().getNearbyEntities(currPos, PROJECTILE_RADIUS_X, PROJECTILE_RADIUS_Y, PROJECTILE_RADIUS_Z)) {
+                        if (!(entity instanceof Player playerHit)) continue;
+                        if (playerHit.getUniqueId().equals(shooter.getUniqueId())) continue; // No self-hit
+                        // Optionally, check player game state, in spawn, etc here
+                        // e.g. if (profile1.getProfileState() == ProfileState.SPAWN) continue;
+
+                        // Optionally: use player's bounding box instead of entity center for a more realistic hit
+                        BoundingBox playerBB = BoundingBox.of(playerHit.getLocation(), PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_DEPTH);
+                        if (!projBB.overlaps(playerBB)) continue; // Must actually overlap!
+
+                        // Hit!
+                        Location hitLoc = playerHit.getLocation().clone();
                         Bukkit.getPluginManager().callEvent(
-                                new BlockProjectileHitEvent(projectile, shooter, entityHit.getHitEntity(), hitLoc)
+                                new BlockProjectileHitEvent(projectile, shooter, playerHit, hitLoc)
                         );
                         projectile.remove();
                         cancel();
@@ -171,7 +177,7 @@ public class BlockProjectile implements Listener {
                     return;
                 }
 
-                prevPos = projectile.getLocation().clone();
+                prevPos = currPos.clone();
             }
         }.runTaskTimer(plugin, 1L, 1L);
     }
