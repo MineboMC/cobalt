@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,5 +29,45 @@ public class LocationUtil {
             }
         }
         return players;
+    }
+
+    public static Player getNearestPlayer(LivingEntity source, double radius) {
+        Player nearest = null;
+        double nearestDistSq = radius * radius;
+        Location srcLoc = source.getLocation();
+
+        List<Player> players = getNearbyPlayers(source, radius);
+        for (Player player : players) {
+            double distSq = player.getLocation().distanceSquared(srcLoc);
+            if (distSq <= nearestDistSq) {
+                if (nearest == null || distSq < nearest.getLocation().distanceSquared(srcLoc)) {
+                    nearest = player;
+                    nearestDistSq = distSq;
+                }
+            }
+        }
+        return nearest;
+    }
+
+    public static Player getNearestPlayer(Location source, double radius) {
+        Player nearest = null;
+        double nearestDistSq = radius * radius;
+        Location srcLoc = source;
+
+        List<Player> players = getNearbyPlayers(source, radius);
+        for (Player player : players) {
+            double distSq = player.getLocation().distanceSquared(srcLoc);
+            if (distSq <= nearestDistSq) {
+                if (nearest == null || distSq < nearest.getLocation().distanceSquared(srcLoc)) {
+                    nearest = player;
+                    nearestDistSq = distSq;
+                }
+            }
+        }
+        return nearest;
+    }
+
+    public static Location getForwardOffset(Location from, Vector direction, double distance) {
+        return from.clone().add(direction.clone().normalize().multiply(distance));
     }
 }

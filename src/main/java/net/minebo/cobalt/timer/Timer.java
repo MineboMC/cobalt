@@ -52,7 +52,7 @@ public abstract class Timer implements Listener {
                     }
                 }
             })
-            .repeat(30L, 30L) // 30 ticks = 1.5 seconds; match your logic here
+            .repeat(20L, 20L)
             .run();
 
         taskMap.put(player.getUniqueId(), new Task(bukkitTask.getTaskId(), System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(durationSeconds)));

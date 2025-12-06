@@ -66,32 +66,43 @@ public class ItemProjectile implements Listener {
                     return;
                 }
 
-                if (projectile.isOnGround()) {
+                Vector velocity = projectile.getVelocity();
+                Location pos = projectile.getLocation();
+                double distance = velocity.length();
+                if (distance == 0) return;
+
+                // Entity raytrace (already present)
+                RayTraceResult entityHit = projectile.getWorld().rayTraceEntities(
+                        pos, velocity.normalize(), distance,
+                        entity -> entity instanceof Player && !entity.equals(shooter)
+                );
+                if (entityHit != null && entityHit.getHitEntity() != null) {
                     Bukkit.getPluginManager().callEvent(
-                            new CustomItemProjectileHitEvent(projectile, shooter, null, projectile.getLocation())
+                            new ItemProjectileHitEvent(projectile, shooter, entityHit.getHitEntity(), entityHit.getHitPosition().toLocation(projectile.getWorld()))
                     );
                     projectile.remove();
                     cancel();
                     return;
                 }
 
-                Vector velocity = projectile.getVelocity();
-                double distance = velocity.length();
-                if (distance == 0) return;
-
-                Location position = projectile.getLocation();
-
-                RayTraceResult res = projectile.getWorld().rayTraceEntities(
-                        position,
-                        velocity.normalize(),
-                        distance,
-                        entity -> entity instanceof Player && !entity.equals(shooter)
+                // NEW: Block raytrace, catches walls and ground BEFORE bouncing/skidding
+                RayTraceResult blockHit = projectile.getWorld().rayTraceBlocks(
+                        pos, velocity.normalize(), distance
                 );
+                if (blockHit != null) {
+                    Bukkit.getPluginManager().callEvent(
+                            new ItemProjectileHitEvent(projectile, shooter, null, blockHit.getHitPosition().toLocation(projectile.getWorld()))
+                    );
+                    projectile.remove();
+                    cancel();
+                    return;
+                }
 
-                if (res != null && res.getHitEntity() != null) {
-                    Entity hit = res.getHitEntity();
-                    Location hitLoc = res.getHitPosition().toLocation(projectile.getWorld());
-                    Bukkit.getPluginManager().callEvent(new CustomItemProjectileHitEvent(projectile, shooter, hit, hitLoc));
+                // If no collision, original isOnGround check is now a fallback
+                if (projectile.isOnGround()) {
+                    Bukkit.getPluginManager().callEvent(
+                            new ItemProjectileHitEvent(projectile, shooter, null, projectile.getLocation())
+                    );
                     projectile.remove();
                     cancel();
                 }
@@ -104,7 +115,7 @@ public class ItemProjectile implements Listener {
      * Use this as a template for custom effects (damage, particles, etc).
      */
     @EventHandler
-    public void onProjectileHit(CustomItemProjectileHitEvent event) {
+    public void onProjectileHit(ItemProjectileHitEvent event) {
         Player shooter = event.getShooter();
         Entity hit = event.getHitEntity();
         if (hit instanceof Player target) {
@@ -123,14 +134,14 @@ public class ItemProjectile implements Listener {
      * Custom event fired when our item projectile hits something.
      */
     @Getter
-    public static class CustomItemProjectileHitEvent extends Event {
+    public static class ItemProjectileHitEvent extends Event {
         private static final HandlerList HANDLERS = new HandlerList();
         private final Item projectile;
         private final Player shooter;
         private final Entity hitEntity;   // null if hit ground
         private final Location hitLocation;
 
-        public CustomItemProjectileHitEvent(Item projectile, Player shooter, Entity hitEntity, Location hitLocation) {
+        public ItemProjectileHitEvent(Item projectile, Player shooter, Entity hitEntity, Location hitLocation) {
             this.projectile = projectile;
             this.shooter = shooter;
             this.hitEntity = hitEntity;
