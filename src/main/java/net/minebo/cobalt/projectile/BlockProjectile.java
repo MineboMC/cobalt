@@ -17,6 +17,9 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import java.util.Collections;
+import java.util.List;
+
 public class BlockProjectile implements Listener {
 
     JavaPlugin plugin;
@@ -39,7 +42,7 @@ public class BlockProjectile implements Listener {
         Location eye = shooter.getEyeLocation();
         Vector direction = eye.getDirection();
 
-        Location spawnLoc = LocationUtil.getForwardOffset(eye, direction, 1.5); // 1.5 blocks in front of eyes
+        Location spawnLoc = LocationUtil.getForwardOffset(eye, direction, 0.5); // 1.5 blocks in front of eyes
 
         return worldShoot(shooter, blockMaterial.createBlockData(), velocityMod, direction, spawnLoc);
     }
@@ -61,6 +64,10 @@ public class BlockProjectile implements Listener {
         new BukkitRunnable() {
             int ticks = 0;
             Location prevPos = projectile.getLocation().clone();
+
+            // Approximated bounding box size for a player (X, Y, Z).
+            final double PLAYER_WIDTH = 0.6, PLAYER_HEIGHT = 1.8, PLAYER_DEPTH = 0.6;
+
             @Override
             public void run() {
                 if (!projectile.isValid()) {
@@ -73,10 +80,13 @@ public class BlockProjectile implements Listener {
                 ticks++;
 
                 Location currPos = projectile.getLocation();
-                // The bounding box for a FallingBlock. Adjust size if needed for visuals.
-                BoundingBox projBB = BoundingBox.of(currPos, 0.25, 0.25, 0.25);
+                BoundingBox projBB = BoundingBox.of(currPos, 0.25, 0.25, 0.25); // FB block bounding box
 
-                // Scan all blocks in a 3x3x3 area around the projectile
+                // Player bounding box for self-hit prevention
+                BoundingBox shooterBB = BoundingBox.of(
+                        shooter.getLocation(), PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_DEPTH);
+
+                // Scan 3x3x3 area around projectile
                 int px = currPos.getBlockX();
                 int py = currPos.getBlockY();
                 int pz = currPos.getBlockZ();
@@ -84,33 +94,22 @@ public class BlockProjectile implements Listener {
                 for (int dx = -1; dx <= 1; dx++) {
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dz = -1; dz <= 1; dz++) {
-                            Block block = currPos.getWorld().getBlockAt(px+dx, py+dy, pz+dz);
+                            Block block = currPos.getWorld().getBlockAt(px + dx, py + dy, pz + dz);
                             BlockData data = block.getBlockData();
                             Material mat = data.getMaterial();
                             if (mat.isAir()) continue;
 
-                            // Full block collision (handled by vanilla, but let's check anyway)
-                            if (data.isOccluding() && mat.isSolid()) {
-                                BoundingBox blockBB = BoundingBox.of(block);
-                                if (blockBB.overlaps(projBB)) {
-                                    // Collision!
-                                    Bukkit.getPluginManager().callEvent(
-                                            new BlockProjectileHitEvent(projectile, shooter, null, currPos)
-                                    );
-                                    projectile.remove();
-                                    cancel();
-                                    return;
-                                }
-                                continue;
-                            }
-
-                            // Check partial/collision shapes (stairs, hoppers, slabs etc.)
+                            // Use Paper collision shapes if present
                             try {
-                                // Paper API: block.getCollisionShape() returns a list of BoundingBox objects.
-                                if (block.getCollisionShape() != null && !block.getCollisionShape().getBoundingBoxes().isEmpty()) {
-                                    for (BoundingBox shapeBB : block.getCollisionShape().getBoundingBoxes()) {
+                                List<BoundingBox> shapes = block.getCollisionShape() != null
+                                        ? block.getCollisionShape().getBoundingBoxes().stream().toList() : Collections.emptyList();
+
+                                if (!shapes.isEmpty()) {
+                                    for (BoundingBox shapeBB : shapes) {
                                         BoundingBox worldBB = shapeBB.shift(block.getX(), block.getY(), block.getZ());
                                         if (worldBB.overlaps(projBB)) {
+                                            // Don't hit the shooter if bounding boxes overlap
+                                            if (shooterBB.overlaps(projBB)) continue;
                                             Bukkit.getPluginManager().callEvent(
                                                     new BlockProjectileHitEvent(projectile, shooter, null, currPos)
                                             );
@@ -119,22 +118,17 @@ public class BlockProjectile implements Listener {
                                             return;
                                         }
                                     }
-                                } else {
-                                    // Fallback: treat as full block if no special shape information
-                                    BoundingBox blockBB = BoundingBox.of(block);
-                                    if (blockBB.overlaps(projBB)) {
-                                        Bukkit.getPluginManager().callEvent(
-                                                new BlockProjectileHitEvent(projectile, shooter, null, currPos)
-                                        );
-                                        projectile.remove();
-                                        cancel();
-                                        return;
-                                    }
+                                    continue;
                                 }
                             } catch (Throwable ignore) {
-                                // Old Spigot fallback: treat as full block
+                                // API fallback
+                            }
+
+                            // Full block occlusion fallback
+                            if ((data.isOccluding() && mat.isSolid()) || true) {
                                 BoundingBox blockBB = BoundingBox.of(block);
                                 if (blockBB.overlaps(projBB)) {
+                                    if (shooterBB.overlaps(projBB)) continue;
                                     Bukkit.getPluginManager().callEvent(
                                             new BlockProjectileHitEvent(projectile, shooter, null, currPos)
                                     );
@@ -147,16 +141,17 @@ public class BlockProjectile implements Listener {
                     }
                 }
 
-                // Entity raytracing/collision
+                // Raytrace for entities (wait >= 2 ticks to avoid instant collision at launch)
                 if (ticks > 2) {
                     RayTraceResult entityHit = currPos.getWorld().rayTraceEntities(
                             prevPos, velocity.normalize(), velocity.length(),
                             entity -> entity instanceof Player && !entity.equals(shooter)
                     );
-                    if (entityHit != null && entityHit.getHitEntity() != null) {
-                        projectile.teleport(entityHit.getHitPosition().toLocation(projectile.getWorld()));
+                    if (entityHit != null && entityHit.getHitEntity() != null && !entityHit.getHitEntity().equals(shooter)) {
+                        Location hitLoc = entityHit.getHitPosition().toLocation(projectile.getWorld());
+                        projectile.teleport(hitLoc);
                         Bukkit.getPluginManager().callEvent(
-                                new BlockProjectileHitEvent(projectile, shooter, entityHit.getHitEntity(), entityHit.getHitPosition().toLocation(projectile.getWorld()))
+                                new BlockProjectileHitEvent(projectile, shooter, entityHit.getHitEntity(), hitLoc)
                         );
                         projectile.remove();
                         cancel();
@@ -164,15 +159,18 @@ public class BlockProjectile implements Listener {
                     }
                 }
 
-                // Standing/landing fallback
+                // Check for landing/standing on ground
                 if (projectile.isOnGround()) {
-                    Bukkit.getPluginManager().callEvent(
-                            new BlockProjectileHitEvent(projectile, shooter, null, projectile.getLocation())
-                    );
+                    if (!shooterBB.overlaps(projBB)) {
+                        Bukkit.getPluginManager().callEvent(
+                                new BlockProjectileHitEvent(projectile, shooter, null, projectile.getLocation())
+                        );
+                    }
                     projectile.remove();
                     cancel();
                     return;
                 }
+
                 prevPos = projectile.getLocation().clone();
             }
         }.runTaskTimer(plugin, 1L, 1L);
