@@ -148,6 +148,14 @@ public class PotionBuilder {
     }
 
     /**
+     * Set the amount of the potion.
+     */
+    public PotionBuilder setSize(int size) {
+        itemStack.setAmount(size);
+        return this;
+    }
+
+    /**
      * Build the ItemStack (applies the meta and returns the item).
      */
     public ItemStack build() {
