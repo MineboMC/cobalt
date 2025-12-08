@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public class Button {
 
     public Supplier<String> name;
-    private Supplier<List<String>> lines;
+    public Supplier<List<String>> lines;
     public Supplier<Material> material;
     public Supplier<Integer> amount;
     private HashMap<ClickType, List<Consumer<Player>>> clickActions;
