@@ -151,6 +151,13 @@ public class PotionBuilder {
      * Set the amount of the potion.
      */
     public PotionBuilder setSize(int size) {
+        if (potionMeta == null) {
+            itemMeta = itemStack.getItemMeta();
+            if (itemMeta instanceof PotionMeta) potionMeta = (PotionMeta) itemMeta;
+        }
+        if (potionMeta != null) {
+            potionMeta.setMaxStackSize(64);
+        }
         itemStack.setAmount(size);
         return this;
     }
