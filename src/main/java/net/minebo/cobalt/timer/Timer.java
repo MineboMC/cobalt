@@ -60,6 +60,12 @@ public abstract class Timer implements Listener {
         taskMap.put(player.getUniqueId(), new Task(bukkitTask.getTaskId(), System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(durationSeconds)));
     }
 
+    public void cancel(Player player) {
+        if (hasTimer(player.getUniqueId())) {
+            Bukkit.getScheduler().cancelTask(taskMap.get(player.getUniqueId()).getTaskId());
+        }
+    }
+
     public boolean hasTimer(UUID uuid) {
         return taskMap.containsKey(uuid);
     }
