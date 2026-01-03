@@ -67,7 +67,7 @@ public abstract class GlobalTimer implements Listener {
         return activeTask != null;
     }
 
-    public String getRemaining(Player player) {
+    public String getRemaining() {
         long millisLeft = activeTask.getTime() - System.currentTimeMillis();
         if (millisLeft <= 0) return "0";
 
