@@ -17,14 +17,12 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class Timer implements Listener {
 
-    protected final Player player;
     protected final int durationSeconds;
     protected final Map<UUID, Task> taskMap;
     protected final Plugin plugin;
     private BukkitTask bukkitTask;
 
-    public Timer(Player player, int durationSeconds, Plugin plugin) {
-        this.player = player;
+    public Timer(int durationSeconds, Plugin plugin) {
         this.durationSeconds = durationSeconds;
         this.taskMap = new HashMap<>();
         this.plugin = plugin;
@@ -32,7 +30,7 @@ public abstract class Timer implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    public void start() {
+    public void start(Player player) {
         // Cancel any existing
         if (taskMap.containsKey(player.getUniqueId())) {
             Bukkit.getScheduler().cancelTask(taskMap.get(player.getUniqueId()).getTaskId());
