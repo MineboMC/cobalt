@@ -8,21 +8,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Timer implements Listener {
+
     protected final Player player;
     protected final int durationSeconds;
     protected final Map<UUID, Task> taskMap;
     protected final Plugin plugin;
     private BukkitTask bukkitTask;
 
-    public Timer(Player player, int durationSeconds, Map<UUID, Task> taskMap, Plugin plugin) {
+    public Timer(Player player, int durationSeconds, Plugin plugin) {
         this.player = player;
         this.durationSeconds = durationSeconds;
-        this.taskMap = taskMap;
+        this.taskMap = new HashMap<>();
         this.plugin = plugin;
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -70,12 +73,4 @@ public abstract class Timer implements Listener {
     /** Called when timer finishes and task is completed normally. */
     protected abstract void onComplete();
 
-
-    @Data
-    @AllArgsConstructor
-    public static class Task {
-
-        private final int taskId;
-        private final long time;
-    }
 }
