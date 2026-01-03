@@ -3,6 +3,7 @@ package net.minebo.cobalt.timer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import net.minebo.cobalt.scheduler.Scheduler;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -59,6 +60,27 @@ public abstract class Timer implements Listener {
             .run();
 
         taskMap.put(player.getUniqueId(), new Task(bukkitTask.getTaskId(), System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(durationSeconds)));
+    }
+
+    public boolean hasTimer(UUID uuid) {
+        return taskMap.containsKey(uuid);
+    }
+
+    public String getRemaining(Player player) {
+        long millisLeft = taskMap.get(player.getUniqueId()).getTime() - System.currentTimeMillis();
+        if (millisLeft <= 0) return "0";
+
+        if (millisLeft >= TimeUnit.MINUTES.toMillis(1)) {
+            return DurationFormatUtils.formatDuration(millisLeft, "mm:ss");
+        }
+
+        if (millisLeft >= TimeUnit.HOURS.toMillis(1)) {
+            return DurationFormatUtils.formatDuration(millisLeft, "hh:mm:ss");
+        }
+
+        // Show seconds with one decimal (e.g., 15.3s)
+        double seconds = millisLeft / 1000.0;
+        return String.format("%.1fs", seconds);
     }
 
     /** Called right after starting the task. */
