@@ -35,13 +35,13 @@ public abstract class Timer implements Listener {
         if (taskMap.containsKey(player.getUniqueId())) {
             Bukkit.getScheduler().cancelTask(taskMap.get(player.getUniqueId()).getTaskId());
         }
-        onStart();
+        onStart(player);
 
         final int[] secondsLeft = { durationSeconds };
 
         bukkitTask = new Scheduler(plugin)
             .sync(() -> {
-                if (!onTick(secondsLeft[0])) {
+                if (!onTick(player, secondsLeft[0])) {
                     bukkitTask.cancel();
                     return;
                 }
@@ -49,7 +49,7 @@ public abstract class Timer implements Listener {
                 if (secondsLeft[0] == 0) {
                     if (taskMap.containsKey(player.getUniqueId())) {
                         taskMap.remove(player.getUniqueId());
-                        onComplete();
+                        onComplete(player);
                         bukkitTask.cancel();
                     }
                 }
@@ -82,15 +82,15 @@ public abstract class Timer implements Listener {
     }
 
     /** Called right after starting the task. */
-    protected abstract void onStart();
+    protected abstract void onStart(Player player);
 
     /**
      * Called every tick before secondsLeft is decremented.
      * Return false if the task should be cancelled immediately.
      */
-    protected boolean onTick(int secondsLeft) { return true; }
+    protected boolean onTick(Player player, int secondsLeft) { return true; }
 
     /** Called when timer finishes and task is completed normally. */
-    protected abstract void onComplete();
+    protected abstract void onComplete(Player player);
 
 }
