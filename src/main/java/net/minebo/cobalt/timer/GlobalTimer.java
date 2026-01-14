@@ -84,7 +84,7 @@ public abstract class GlobalTimer implements Listener {
         return String.format("%.1fs", seconds);
     }
 
-    /** Called right after starting the task. */
+    /** Called right after starting the task.*/
     protected abstract void onStart();
 
     /**
@@ -93,7 +93,7 @@ public abstract class GlobalTimer implements Listener {
      */
     protected boolean onTick(int secondsLeft) { return true; }
 
-    /** Called when timer finishes and task is completed normally. */
+    /** Called when timer finishes and task is completed normally.*/
     protected abstract void onComplete();
 
 }

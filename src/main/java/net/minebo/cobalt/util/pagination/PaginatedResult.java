@@ -8,6 +8,20 @@ public class PaginatedResult<T> {
     private final LinkedHashMap<String, T> ranked;
     private final int resultsPerPage;
 
+    // Without comparator
+    public PaginatedResult(HashMap<String, T> input, int resultsPerPage) {
+        this.ranked = input.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+        this.resultsPerPage = resultsPerPage;
+    }
+
+    // With comparator (should look like this somewhat (entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())
     public PaginatedResult(HashMap<String, T> input, int resultsPerPage, Comparator<Map.Entry<String, T>> comparator) {
         this.ranked = input.entrySet()
                 .stream()

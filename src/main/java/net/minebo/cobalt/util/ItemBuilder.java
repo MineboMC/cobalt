@@ -28,7 +28,7 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder setLore(String... lore) {
+    public ItemBuilder setLore(String...lore) {
         ItemMeta meta = itemStack.getItemMeta();
         meta.setLore(List.of(lore));
         itemStack.setItemMeta(meta);

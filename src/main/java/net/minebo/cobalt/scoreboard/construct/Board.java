@@ -49,7 +49,7 @@ public class Board extends BoardBase<String> {
     * {@inheritDoc}
     */
    @Override
-   public void updateLines(String... lines) {
+   public void updateLines(String...lines) {
       Objects.requireNonNull(lines, "lines");
 
       if (!VersionType.V1_13.isHigherOrEqual()) {

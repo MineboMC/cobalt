@@ -18,7 +18,7 @@ public class InventoryUtil {
         return null;
     }
 
-    public static Integer getFirstEmptySlot(Inventory inventory, Material... materials) {
+    public static Integer getFirstEmptySlot(Inventory inventory, Material...materials) {
         if (inventory == null) return null;
 
         boolean hasMaterials = materials != null && materials.length > 0;

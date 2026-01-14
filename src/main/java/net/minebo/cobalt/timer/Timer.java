@@ -87,7 +87,7 @@ public abstract class Timer implements Listener {
         return String.format("%.1fs", seconds);
     }
 
-    /** Called right after starting the task. */
+    /** Called right after starting the task.*/
     protected abstract void onStart(Player player);
 
     /**
@@ -96,7 +96,7 @@ public abstract class Timer implements Listener {
      */
     protected boolean onTick(Player player, int secondsLeft) { return true; }
 
-    /** Called when timer finishes and task is completed normally. */
+    /** Called when timer finishes and task is completed normally.*/
     protected abstract void onComplete(Player player);
 
 }

@@ -181,7 +181,7 @@ public abstract class ClassesYamlStorage extends YamlStorage {
             }
          }
       } catch (ReflectiveOperationException e) {
-         LOGGER.error("[Storage] Invalid Instance. {}", e.getMessage(), e);
+         LOGGER.error("[Storage] Invalid Instance.{}", e.getMessage(), e);
       }
 
       return null;

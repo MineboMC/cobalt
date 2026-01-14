@@ -271,7 +271,7 @@ public abstract class BoardBase<T> {
    }
 
    /**
-    * Get how a specific line's score is displayed. On 1.20.2 or below, the value returned isn't used.
+    * Get how a specific line's score is displayed.On 1.20.2 or below, the value returned isn't used.
     *
     * @param line the line number
     * @return the text of how the line is displayed
@@ -365,7 +365,7 @@ public abstract class BoardBase<T> {
     * @throws IllegalArgumentException if one line is longer than 30 chars on 1.12 or lower
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public void updateLines(T... lines) {
+   public void updateLines(T...lines) {
       updateLines(Arrays.asList(lines));
    }
 
@@ -440,11 +440,11 @@ public abstract class BoardBase<T> {
    }
 
    /**
-    * Update how a specified line's score is displayed on the scoreboard. A null value will reset the displayed
-    * text back to default. The scores will only be displayed for servers on 1.20.3 and higher.
+    * Update how a specified line's score is displayed on the scoreboard.A null value will reset the displayed
+    * text back to default.The scores will only be displayed for servers on 1.20.3 and higher.
     *
     * @param line the line number
-    * @param text the text to be displayed as the score. if null, no score will be displayed
+    * @param text the text to be displayed as the score.if null, no score will be displayed
     * @throws IllegalArgumentException if the line number is not in range
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
@@ -463,7 +463,7 @@ public abstract class BoardBase<T> {
    }
 
    /**
-    * Reset a line's score back to default (blank). The score will only be displayed for servers on 1.20.3 and higher.
+    * Reset a line's score back to default (blank).The score will only be displayed for servers on 1.20.3 and higher.
     *
     * @param line the line number
     * @throws IllegalArgumentException if the line number is not in range
@@ -474,20 +474,20 @@ public abstract class BoardBase<T> {
    }
 
    /**
-    * Update how all lines' scores are displayed. A value of null will reset the displayed text back to default.
+    * Update how all lines' scores are displayed.A value of null will reset the displayed text back to default.
     * The scores will only be displayed for servers on 1.20.3 and higher.
     *
     * @param texts the set of texts to be displayed as the scores
     * @throws IllegalArgumentException if the size of the texts does not match the current size of the board
     * @throws IllegalStateException    if {@link #delete()} was call before
     */
-   public synchronized void updateScores(T... texts) {
+   public synchronized void updateScores(T...texts) {
       updateScores(Arrays.asList(texts));
    }
 
    /**
-    * Update how all lines' scores are displayed.  A null value will reset the displayed
-    * text back to default (blank). Only available on 1.20.3+ servers.
+    * Update how all lines' scores are displayed. A null value will reset the displayed
+    * text back to default (blank).Only available on 1.20.3+ servers.
     *
     * @param texts the set of texts to be displayed as the scores
     * @throws IllegalArgumentException if the size of the texts does not match the current size of the board

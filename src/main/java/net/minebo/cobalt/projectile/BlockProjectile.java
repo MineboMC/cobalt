@@ -148,7 +148,7 @@ public class BlockProjectile implements Listener {
                         if (!(entity instanceof Player playerHit)) continue;
                         if (playerHit.getUniqueId().equals(shooter.getUniqueId())) continue; // No self-hit
                         // Optionally, check player game state, in spawn, etc here
-                        // e.g. if (profile1.getProfileState() == ProfileState.SPAWN) continue;
+                        // e.g.if (profile1.getProfileState() == ProfileState.SPAWN) continue;
 
                         // Optionally: use player's bounding box instead of entity center for a more realistic hit
                         BoundingBox playerBB = BoundingBox.of(playerHit.getLocation(), PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_DEPTH);

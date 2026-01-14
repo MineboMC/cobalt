@@ -11,6 +11,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public enum ParticleEffect {
+
     POOF(Particle.POOF),
     EXPLOSION(Particle.EXPLOSION),
     EXPLOSION_EMITTER(Particle.EXPLOSION_EMITTER),
@@ -160,7 +161,7 @@ public enum ParticleEffect {
     }
 
     // Basic particle display
-    public void display(Location location, int amount, double offsetX, double offsetY, double offsetZ, double speed, Player... players) {
+    public void display(Location location, int amount, double offsetX, double offsetY, double offsetZ, double speed, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, offsetX, offsetY, offsetZ, speed);
         }
@@ -172,7 +173,7 @@ public enum ParticleEffect {
     }
 
     // Color support for REDSTONE, ENTITY_EFFECT, etc
-    public void displayColor(Location location, org.bukkit.Color color, int amount, Player... players) {
+    public void displayColor(Location location, org.bukkit.Color color, int amount, Player...players) {
         for (Player player : players) {
             if (bukkitParticle == Particle.DUST) {
                 DustOptions data = new DustOptions(color, 1.0F);
@@ -187,51 +188,51 @@ public enum ParticleEffect {
     }
 
     // Special block-support particles
-    public void displayBlock(Location location, BlockData blockData, int amount, Player... players) {
+    public void displayBlock(Location location, BlockData blockData, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, blockData);
         }
     }
-    public void displayBlock(Location location, Material blockType, int amount, Player... players) {
+    public void displayBlock(Location location, Material blockType, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, blockType.createBlockData());
         }
     }
     // Item particles
-    public void displayItem(Location location, ItemStack itemStack, int amount, Player... players) {
+    public void displayItem(Location location, ItemStack itemStack, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, itemStack);
         }
     }
-    public void displayItem(Location location, Material itemType, int amount, Player... players) {
+    public void displayItem(Location location, Material itemType, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, new ItemStack(itemType));
         }
     }
 
     // DustTransition support
-    public void displayDustTransition(Location location, DustTransition transition, int amount, Player... players) {
+    public void displayDustTransition(Location location, DustTransition transition, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(Particle.DUST_COLOR_TRANSITION, location, amount, 0, 0, 0, 1.0, transition);
         }
     }
 
     // Vibration support
-    public void displayVibration(Location location, org.bukkit.Vibration vibration, int amount, Player... players) {
+    public void displayVibration(Location location, org.bukkit.Vibration vibration, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(Particle.VIBRATION, location, amount, 0, 0, 0, 1.0, vibration);
         }
     }
 
     // SCULK_CHARGE + SHRIEK support (float & int)
-    public void displayData(Location location, Object data, int amount, Player... players) {
+    public void displayData(Location location, Object data, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 1.0, data);
         }
     }
 
     // Directional particles
-    public void displayDirectional(Location location, Vector direction, double speed, int amount, Player... players) {
+    public void displayDirectional(Location location, Vector direction, double speed, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, direction.getX(), direction.getY(), direction.getZ(), speed);
         }

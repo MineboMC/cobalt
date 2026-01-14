@@ -13,7 +13,7 @@ import org.bukkit.potion.PotionType;
 import java.util.List;
 
 /**
- * Fluent builder for potions. Mirrors the style of the provided ItemBuilder.
+ * Fluent builder for potions.Mirrors the style of the provided ItemBuilder.
  *
  * Example usage:
  * new PotionBuilder()
@@ -29,12 +29,34 @@ public class PotionBuilder {
     public PotionMeta potionMeta;
 
     public PotionBuilder() {
-        this(Material.POTION);
+        this(BottleType.DRINK);
+    }
+
+    /**
+     * Construct with a type of potion (Drink, Splash, Lingering).
+     */
+    public PotionBuilder(BottleType type) {
+        if (type == null) type = BottleType.DRINK;
+        switch (type) {
+            case BottleType.SPLASH:
+                itemStack = new ItemStack(Material.SPLASH_POTION);
+                break;
+            case BottleType.LINGER:
+                itemStack = new ItemStack(Material.LINGERING_POTION);
+                break;
+            default:
+                itemStack = new ItemStack(Material.POTION);
+                break;
+        }
+
+        itemMeta = itemStack.getItemMeta();
+        if (itemMeta instanceof PotionMeta) {
+            potionMeta = (PotionMeta) itemMeta;
+        }
     }
 
     /**
      * Construct with a specific potion material (POTION, SPLASH_POTION, LINGERING_POTION).
-     * If another material is supplied it will default to POTION.
      */
     public PotionBuilder(Material material) {
         if (material != Material.POTION && material != Material.SPLASH_POTION && material != Material.LINGERING_POTION) {
@@ -60,7 +82,7 @@ public class PotionBuilder {
     /**
      * Set lore lines.
      */
-    public PotionBuilder setLore(String... lore) {
+    public PotionBuilder setLore(String...lore) {
         if (itemMeta == null) itemMeta = itemStack.getItemMeta();
         itemMeta.setLore(List.of(lore));
         if (itemMeta instanceof PotionMeta) potionMeta = (PotionMeta) itemMeta;
@@ -68,37 +90,10 @@ public class PotionBuilder {
     }
 
     /**
-     * Set potion base type (NORMAL, SPLASH, LINGERING) using a string.
-     * Accepts "normal", "splash", "lingering" (case-insensitive).
-     */
-    public PotionBuilder setType(BottleType type) {
-        if (type == null) type = BottleType.DRINK;
-        switch (type) {
-            case BottleType.SPLASH:
-                itemStack.setType(Material.SPLASH_POTION);
-                break;
-            case BottleType.LINGER:
-                itemStack.setType(Material.LINGERING_POTION);
-                break;
-            default:
-                itemStack.setType(Material.POTION);
-                break;
-        }
-        // refresh metas after changing material
-        itemMeta = itemStack.getItemMeta();
-        if (itemMeta instanceof PotionMeta) {
-            potionMeta = (PotionMeta) itemMeta;
-        } else {
-            potionMeta = null;
-        }
-        return this;
-    }
-
-    /**
      * Add a custom potion effect.
      * @param effect The PotionEffectType to add.
-     * @param level  The potion level (1 = amplifier 0). If <= 0, it will be treated as 1.
-     * @param timeSeconds Duration in seconds. Converted to ticks (seconds * 20).
+     * @param level  The potion level (1 = amplifier 0).If <= 0, it will be treated as 1.
+     * @param timeSeconds Duration in seconds.Converted to ticks (seconds * 20).
      */
     public PotionBuilder addEffect(PotionEffectType effect, int level, int timeSeconds) {
         if (effect == null) return this;
@@ -118,7 +113,7 @@ public class PotionBuilder {
     }
 
     /**
-     * Set base PotionType (e.g. INSTANT_HEAL, NIGHT_VISION, etc.)
+     * Set base PotionType (e.g.INSTANT_HEAL, NIGHT_VISION, etc.)
      */
     public PotionBuilder setBasePotionType(PotionType type) {
         if (type == null) return this;

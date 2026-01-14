@@ -47,7 +47,7 @@ public class Button {
     }
 
     // For static lines
-    public Button setLines(String... dynamicLines) {
+    public Button setLines(String...dynamicLines) {
         this.lines = () -> Arrays.stream(dynamicLines)
                 .map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line)))
                 .toList();
