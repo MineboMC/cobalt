@@ -97,6 +97,10 @@ public class Button {
         return this;
     }
 
+    public Boolean shouldCancel(Player player, ClickType clickType) {
+        return true;
+    }
+
 
     // --- Main build method ---
     public ItemStack build() {
