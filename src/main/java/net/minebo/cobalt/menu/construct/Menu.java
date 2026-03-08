@@ -2,6 +2,7 @@ package net.minebo.cobalt.menu.construct;
 
 import net.minebo.cobalt.menu.MenuHandler;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;  // New import
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -20,6 +21,8 @@ public class Menu {
 
     public boolean autoUpdate = false;
     public boolean updateAfterClick = true;
+    public boolean nonCancelling = false;  // New field for noncancelling inventory mode
+    private GameMode originalMode;  // New field to store original game mode for noncancelling menus
 
     public Menu() {
         this.title = "Default Title";
@@ -65,6 +68,15 @@ public class Menu {
         return this;
     }
 
+    public Menu setNoncancellingInventory(boolean nonCancelling) {  // New setter
+        this.nonCancelling = nonCancelling;
+        return this;
+    }
+
+    public int getSlot(int x, int y) {
+        return y * 9 + x;
+    }
+
     public void openMenu(Player player) {
 
         Inventory inv = Bukkit.createInventory(null, size, title);
@@ -74,10 +86,18 @@ public class Menu {
             Supplier<Button> supplier = buttonSuppliers.get(i);
             if (supplier != null) {
                 inv.setItem(i, supplier.get().build());
-            } else {
-                // Fill with glass pane, no name
+            } else if (!nonCancelling) {
+                // Only fill empty slots with AIR if the menu is not noncancelling (to prevent ghosts in regular menus)
+                // For noncancelling menus, leave empty slots unset to allow free item placement/manipulation
                 inv.setItem(i, new Button().setMaterial(Material.AIR).setName(" ").build());
             }
+            // If nonCancelling and no supplier, do nothing (leave slot empty for free manipulation)
+        }
+
+        // Temporarily switch to Survival mode for noncancelling menus to allow item manipulation in any restrictive mode
+        if (nonCancelling && player.getGameMode() != GameMode.SURVIVAL) {
+            originalMode = player.getGameMode();
+            player.setGameMode(GameMode.SURVIVAL);
         }
 
         player.openInventory(inv);
@@ -102,6 +122,12 @@ public class Menu {
         MenuHandler.stopAutoUpdate(player);
         MenuHandler.currentlyOpenedMenus.remove(player.getName());
         MenuHandler.playerMenus.remove(player.getName());
+
+        // Restore original game mode if it was changed for noncancelling menu
+        if (nonCancelling && originalMode != null) {
+            player.setGameMode(originalMode);
+            originalMode = null;  // Reset for next open
+        }
     }
 
 }

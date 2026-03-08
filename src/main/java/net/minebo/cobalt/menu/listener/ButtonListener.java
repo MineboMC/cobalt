@@ -32,16 +32,20 @@ public class ButtonListener implements Listener {
         int slot = event.getSlot();
 
         if (!menu.buttonSuppliers.containsKey(slot)) {
-            // No button in this slot, cancel by default
-            event.setCancelled(true);
+            // No button in this slot
+            if (!menu.nonCancelling) {  // Only cancel if the menu is not set to noncancelling
+                event.setCancelled(true);
+            }
             return;
         }
 
         Button button = menu.buttonSuppliers.get(slot).get();
 
         if (button == null) {
-            // Null button, cancel by default
-            event.setCancelled(true);
+            // Null button
+            if (!menu.nonCancelling) {  // Only cancel if the menu is not set to noncancelling
+                event.setCancelled(true);
+            }
             return;
         }
 

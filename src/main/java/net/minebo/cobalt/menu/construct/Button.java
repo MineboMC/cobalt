@@ -104,7 +104,7 @@ public class Button {
 
     // --- Main build method ---
     public ItemStack build() {
-        ItemStack item = new ItemStack(material.get(), amount.get());
+        ItemStack item = new ItemStack(material.get(), (amount.get() > 0) ? amount.get() : 1);
         ItemMeta meta = item.getItemMeta();
 
         if(meta instanceof PotionMeta) {
