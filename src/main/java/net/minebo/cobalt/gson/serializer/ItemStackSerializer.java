@@ -2,21 +2,46 @@ package net.minebo.cobalt.gson.serializer;
 
 import com.google.gson.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
-import java.util.Map;
+import java.util.Base64;
 
 public class ItemStackSerializer implements JsonSerializer<ItemStack>, JsonDeserializer<ItemStack> {
 
     @Override
-    public JsonElement serialize(ItemStack itemStack, Type typeOfSrc, JsonSerializationContext context) {
-        Map<String, Object> serialized = itemStack.serialize();
-        return context.serialize(serialized);
+    public JsonElement serialize(ItemStack src, Type typeOfSrc, JsonSerializationContext context) {
+        if (src == null) {
+            return JsonNull.INSTANCE;
+        }
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (BukkitObjectOutputStream oos = new BukkitObjectOutputStream(baos)) {
+                oos.writeObject(src);
+            }
+            return new JsonPrimitive(Base64.getEncoder().encodeToString(baos.toByteArray()));
+        } catch (Exception e) {
+            throw new JsonParseException("Failed to serialize ItemStack", e);
+        }
     }
 
     @Override
     public ItemStack deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        Map<String, Object> map = context.deserialize(json, Map.class);
-        return ItemStack.deserialize(map);
+        if (json == null || json.isJsonNull()) {
+            return null;
+        }
+
+        try {
+            byte[] data = Base64.getDecoder().decode(json.getAsString());
+            try (BukkitObjectInputStream ois = new BukkitObjectInputStream(new ByteArrayInputStream(data))) {
+                return (ItemStack) ois.readObject();
+            }
+        } catch (Exception e) {
+            throw new JsonParseException("Failed to deserialize ItemStack", e);
+        }
     }
 }

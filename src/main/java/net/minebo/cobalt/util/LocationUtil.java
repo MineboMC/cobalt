@@ -67,6 +67,14 @@ public class LocationUtil {
         return nearest;
     }
 
+    public static void safeTeleport(Player player, Location location) {
+        if(!location.getChunk().isLoaded()) {
+            location.getChunk().load();
+        }
+
+        player.teleport(location);
+    }
+
     public static Location getForwardOffset(Location from, Vector direction, double distance) {
         return from.clone().add(direction.clone().normalize().multiply(distance));
     }

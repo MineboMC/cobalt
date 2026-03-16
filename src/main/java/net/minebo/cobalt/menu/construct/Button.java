@@ -1,6 +1,5 @@
 package net.minebo.cobalt.menu.construct;
 
-import com.github.retrooper.packetevents.protocol.potion.Potion;
 import lombok.AllArgsConstructor;
 import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.ChatColor;
@@ -34,6 +33,9 @@ public class Button {
         this.material = () -> Material.BOOK;
         this.amount = () -> 1;
         this.clickActions = new HashMap<>();
+
+        // Important: avoid NPE in build() when the item meta is PotionMeta but no potion type was configured
+        this.potionType = () -> null;
     }
 
     // --- Fluent setters ---
@@ -101,14 +103,20 @@ public class Button {
         return true;
     }
 
-
     // --- Main build method ---
     public ItemStack build() {
         ItemStack item = new ItemStack(material.get(), (amount.get() > 0) ? amount.get() : 1);
         ItemMeta meta = item.getItemMeta();
 
-        if(meta instanceof PotionMeta) {
-            ((PotionMeta) meta).setBasePotionType(potionType.get());
+        if (meta instanceof PotionMeta potionMeta) {
+            // potionType is optional; only apply when configured
+            Supplier<PotionType> supplier = this.potionType;
+            if (supplier != null) {
+                PotionType type = supplier.get();
+                if (type != null) {
+                    potionMeta.setBasePotionType(type);
+                }
+            }
         }
 
         if (meta != null) {
