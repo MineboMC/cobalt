@@ -19,6 +19,13 @@ public abstract class GlobalTimer implements Listener {
     private BukkitTask bukkitTask;
     private Task activeTask;
 
+    public GlobalTimer(int time, TimeUnit unit, Plugin plugin) {
+        this.durationSeconds = (int) TimeUnit.SECONDS.convert(time, unit);
+        this.plugin = plugin;
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
     public GlobalTimer(int durationSeconds, Plugin plugin) {
         this.durationSeconds = durationSeconds;
         this.plugin = plugin;

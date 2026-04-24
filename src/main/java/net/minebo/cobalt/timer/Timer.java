@@ -22,6 +22,14 @@ public abstract class Timer implements Listener {
     protected final Plugin plugin;
     private BukkitTask bukkitTask;
 
+    public Timer(int time, TimeUnit unit, Plugin plugin) {
+        this.durationSeconds = (int) TimeUnit.SECONDS.convert(time, unit);
+        this.taskMap = new HashMap<>();
+        this.plugin = plugin;
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
     public Timer(int durationSeconds, Plugin plugin) {
         this.durationSeconds = durationSeconds;
         this.taskMap = new HashMap<>();
