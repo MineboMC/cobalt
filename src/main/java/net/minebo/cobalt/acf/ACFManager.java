@@ -1,55 +1,47 @@
 package net.minebo.cobalt.acf;
 
-import co.aikar.commands.BukkitCommandManager;
-import co.aikar.commands.BukkitMessageFormatter;
-import co.aikar.commands.MessageType;
-import co.aikar.commands.PaperCommandManager;
+import co.aikar.commands.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import java.util.UUID;
-import lombok.Generated;
 import net.minebo.cobalt.acf.completion.ChatColorCompletionHandler;
 import net.minebo.cobalt.acf.completion.MaterialCompletionHandler;
 import net.minebo.cobalt.acf.completion.PlayerCompletionHandler;
 import net.minebo.cobalt.acf.context.ChatColorContextResolver;
 import net.minebo.cobalt.acf.context.OnlinePlayerContextResolver;
 import net.minebo.cobalt.acf.context.UUIDContextResolver;
+import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ACFManager {
    public JavaPlugin plugin;
 
+   public CommandHelpFormatter helpFormatter = (new CommandHelpFormatter(ACFCommandController.commandController) {
+      @Override
+      public void printHelpHeader(CommandHelp help, CommandIssuer issuer) {
+         issuer.sendMessage(ColorUtil.translateColors("&6=== &fShowing help for &e/" + help.getCommandName() + " &6==="));
+      }
+
+      @Override
+      public void printHelpCommand(CommandHelp help, CommandIssuer issuer, HelpEntry entry) {
+         issuer.sendMessage(ColorUtil.translateColors("&e" + entry.getCommand() + "&f " + entry.getParameterSyntax() + " &8- &7" + entry.getDescription()));
+      }
+
+      @Override
+      public void printHelpFooter(CommandHelp help, CommandIssuer issuer) {
+         if (help.isOnlyPage()) return;
+
+         issuer.sendMessage(ColorUtil.translateColors("&f- Showing page &e" + help.getPage() + " of &e" + help.getTotalPages() + " &7(" + help.getTotalResults() + " entries)"));
+      }
+   });
+
    public ACFManager(JavaPlugin plugin) {
       this.plugin = plugin;
 
       ACFCommandController.commandController = new PaperCommandManager(plugin);
-
       ACFCommandController.commandController.enableUnstableAPI("help");
-
-      ACFCommandController.commandController.setFormat(
-              MessageType.SYNTAX,
-              new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.GOLD, ChatColor.WHITE)
-      );
-
-      ACFCommandController.commandController.setFormat(MessageType.HELP, new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.GOLD, ChatColor.GOLD));
-
-      this.registerContexts();
-      this.registerCompletions();
-   }
-
-   public ACFManager(JavaPlugin plugin, Boolean paper) {
-      this.plugin = plugin;
-
-      ACFCommandController.commandController = (paper ? new PaperCommandManager(plugin) : new BukkitCommandManager(plugin));
-
-      ACFCommandController.commandController.enableUnstableAPI("help");
-
-      ACFCommandController.commandController.setFormat(
-              MessageType.SYNTAX,
-              new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.GOLD, ChatColor.WHITE)
-      );
-
-      ACFCommandController.commandController.setFormat(MessageType.HELP, new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.GOLD, ChatColor.GOLD));
+      ACFCommandController.commandController.setFormat(MessageType.HELP, new BukkitMessageFormatter(ChatColor.YELLOW, ChatColor.WHITE, ChatColor.GRAY));
+      ACFCommandController.commandController.setHelpFormatter(helpFormatter);
 
       this.registerContexts();
       this.registerCompletions();
