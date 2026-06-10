@@ -31,7 +31,7 @@ public class ACFManager {
       public void printHelpFooter(CommandHelp help, CommandIssuer issuer) {
          if (help.isOnlyPage()) return;
 
-         issuer.sendMessage(ColorUtil.translateColors("&f- Showing page &e" + help.getPage() + " of &e" + help.getTotalPages() + " &7(" + help.getTotalResults() + " entries)"));
+         issuer.sendMessage(ColorUtil.translateColors("&f- Showing page &e" + help.getPage() + " &fof &e" + help.getTotalPages() + " &7(" + help.getTotalResults() + " entries)"));
       }
    });
 
