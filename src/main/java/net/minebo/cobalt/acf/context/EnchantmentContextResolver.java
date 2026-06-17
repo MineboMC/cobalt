@@ -2,14 +2,18 @@ package net.minebo.cobalt.acf.context;
 
 import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.InvalidCommandArgument;
+import co.aikar.commands.contexts.ContextResolver;
 import co.aikar.commands.contexts.IssuerAwareContextResolver;
 import org.bukkit.enchantments.Enchantment;
 
-public class EnchantmentContextResolver implements IssuerAwareContextResolver<Enchantment, BukkitCommandExecutionContext> {
+//                                                  vvv this is why we dont trust ai blindly
+public class EnchantmentContextResolver implements ContextResolver<Enchantment, BukkitCommandExecutionContext> {
 
     @Override
     public Enchantment getContext(BukkitCommandExecutionContext context) throws InvalidCommandArgument {
         String arg = context.popFirstArg();
+
+        if (arg == null) return null;
 
         Enchantment enchantment = Enchantment.getByKey(org.bukkit.NamespacedKey.minecraft(arg.toLowerCase()));
         if (enchantment != null) {
@@ -25,6 +29,6 @@ public class EnchantmentContextResolver implements IssuerAwareContextResolver<En
             }
         }
 
-        throw new InvalidCommandArgument("Invalid enchantment: " + arg, false);
+        return null;
     }
 }
