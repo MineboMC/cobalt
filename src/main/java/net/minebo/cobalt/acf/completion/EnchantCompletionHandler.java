@@ -2,19 +2,24 @@ package net.minebo.cobalt.acf.completion;
 
 import co.aikar.commands.CommandCompletionContext;
 import co.aikar.commands.CommandCompletions;
-import co.aikar.commands.InvalidCommandArgument;
-import net.minebo.cobalt.util.EnchantmentWrapper;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class EnchantCompletionHandler implements CommandCompletions.CommandCompletionHandler {
+
     @Override
-    public Collection<String> getCompletions(CommandCompletionContext context) throws InvalidCommandArgument {
+    public Collection<String> getCompletions(CommandCompletionContext context) {
+        String input = context.getInput() != null ? context.getInput().toLowerCase() : "";
+
         return Arrays.stream(Enchantment.values())
-                .map(EnchantmentWrapper::parse) // or your own method
-                .map(EnchantmentWrapper::getFriendlyName)
-                .toList();
+                .filter(enchantment -> {
+                    String key = enchantment.getKey().getKey(); // e.g. "sharpness"
+                    return key.startsWith(input);
+                })
+                .map(enchantment -> enchantment.getKey().getKey().toUpperCase()) // UPPERCASE with underscores
+                .collect(Collectors.toList());
     }
 }
