@@ -6,10 +6,12 @@ import java.util.UUID;
 
 import net.minebo.cobalt.acf.completion.*;
 import net.minebo.cobalt.acf.context.ChatColorContextResolver;
+import net.minebo.cobalt.acf.context.EnchantmentContextResolver;
 import net.minebo.cobalt.acf.context.OnlinePlayerContextResolver;
 import net.minebo.cobalt.acf.context.UUIDContextResolver;
 import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ACFManager {
@@ -50,6 +52,7 @@ public class ACFManager {
       ACFCommandController.registerContext(ChatColor.class, new ChatColorContextResolver());
       ACFCommandController.registerContext(OnlinePlayer.class, new OnlinePlayerContextResolver());
       ACFCommandController.registerContext(UUID.class, new UUIDContextResolver());
+      ACFCommandController.registerContext(Enchantment.class, new EnchantmentContextResolver());
    }
 
    public void registerCompletions() {
