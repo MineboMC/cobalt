@@ -3,9 +3,8 @@ package net.minebo.cobalt.acf;
 import co.aikar.commands.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import java.util.UUID;
-import net.minebo.cobalt.acf.completion.ChatColorCompletionHandler;
-import net.minebo.cobalt.acf.completion.MaterialCompletionHandler;
-import net.minebo.cobalt.acf.completion.PlayerCompletionHandler;
+
+import net.minebo.cobalt.acf.completion.*;
 import net.minebo.cobalt.acf.context.ChatColorContextResolver;
 import net.minebo.cobalt.acf.context.OnlinePlayerContextResolver;
 import net.minebo.cobalt.acf.context.UUIDContextResolver;
@@ -57,6 +56,8 @@ public class ACFManager {
       ACFCommandController.registerCompletion("chatcolors", new ChatColorCompletionHandler());
       ACFCommandController.registerCompletion("materials", new MaterialCompletionHandler());
       ACFCommandController.registerCompletion("players", new PlayerCompletionHandler());
+      ACFCommandController.registerCompletion("dyecolors", new DyeColorCompletionHandler());
+      ACFCommandController.registerCompletion("enchants", new EnchantCompletionHandler());
    }
 
 }
