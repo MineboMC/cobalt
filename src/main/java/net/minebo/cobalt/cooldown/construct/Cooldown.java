@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -23,46 +22,52 @@ public class Cooldown implements Listener {
      * Applies a cooldown to the player.
      *
      * @param player    The player.
-     * @param cooldown  Time in seconds.
+     * @param cooldown  The duration of the cooldown.
+     * @param unit      The time unit of the cooldown.
+     * @param plugin    The plugin to schedule the task with.
      */
     public void applyCooldown(Player player, long cooldown, TimeUnit unit, JavaPlugin plugin) {
         UUID uuid = player.getUniqueId();
-        long expireTime = System.currentTimeMillis() + unit.toMillis(cooldown);
+
+        long millis = unit.toMillis(cooldown);
+        long expireTime = System.currentTimeMillis() + millis;
+
         cooldownMap.put(uuid, expireTime);
 
-        // Call overridable hook
         onApply(player);
 
-        // Schedule expiration exactly when this cooldown ends
+        // Schedule expiration using proper tick conversion
+        long ticks = Math.max(1, millis / 50); // 50ms per tick (1000ms / 20 ticks)
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            // Check that this is still the same cooldown (hasn't been reapplied with a new time)
             Long storedExpire = cooldownMap.get(uuid);
             if (storedExpire != null && storedExpire == expireTime) {
                 removeCooldown(player);
                 onExpire(player);
             }
-        }, cooldown * 20L); // 20 ticks = 1 second
-
+        }, ticks);
     }
 
     public boolean onCooldown(Player player) {
-        return cooldownMap.containsKey(player.getUniqueId()) &&
-                cooldownMap.get(player.getUniqueId()) >= System.currentTimeMillis();
+        Long expireTime = cooldownMap.get(player.getUniqueId());
+        return expireTime != null && expireTime >= System.currentTimeMillis();
     }
 
     public String getRemaining(Player player) {
-        long millisLeft = cooldownMap.get(player.getUniqueId()) - System.currentTimeMillis();
+        Long expireTime = cooldownMap.get(player.getUniqueId());
+        if (expireTime == null) return "0";
+
+        long millisLeft = expireTime - System.currentTimeMillis();
         if (millisLeft <= 0) return "0";
 
         if (millisLeft >= TimeUnit.MINUTES.toMillis(1)) {
             return DurationFormatUtils.formatDuration(millisLeft, "mm:ss");
         }
 
-        // Show seconds with one decimal (e.g., 15.3s)
+        // Show seconds with one decimal for short cooldowns
         double seconds = millisLeft / 1000.0;
         return String.format("%.1fs", seconds);
     }
-
 
     public void removeCooldown(Player player) {
         cooldownMap.remove(player.getUniqueId());

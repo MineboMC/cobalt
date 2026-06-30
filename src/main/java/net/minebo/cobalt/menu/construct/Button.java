@@ -2,6 +2,7 @@ package net.minebo.cobalt.menu.construct;
 
 import lombok.AllArgsConstructor;
 import net.minebo.cobalt.util.ColorUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -9,8 +10,8 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionType;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -26,6 +27,7 @@ public class Button {
 
     // Special Cases
     public Supplier<PotionType> potionType;
+    public Supplier<UUID> skullOwner;
 
     public Button() {
         this.name = () -> "";
@@ -34,29 +36,27 @@ public class Button {
         this.amount = () -> 1;
         this.clickActions = new HashMap<>();
 
-        // Important: avoid NPE in build() when the item meta is PotionMeta but no potion type was configured
         this.potionType = () -> null;
+        this.skullOwner = () -> null;        // ← NEW
     }
 
-    // --- Fluent setters ---
     public Button setName(String name) {
         this.name = () -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name));
         return this;
     }
+
     public Button setName(Supplier<String> nameSupplier) {
         this.name = () -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(nameSupplier.get()));
         return this;
     }
 
-    // For static lines
-    public Button setLines(String...dynamicLines) {
+    public Button setLines(String... dynamicLines) {
         this.lines = () -> Arrays.stream(dynamicLines)
                 .map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line)))
                 .toList();
         return this;
     }
 
-    // For dynamic lines
     public Button setLines(Supplier<List<String>> linesSupplier) {
         this.lines = () -> linesSupplier.get().stream()
                 .map(line -> ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(line)))
@@ -84,6 +84,16 @@ public class Button {
         return this;
     }
 
+    public Button setSkullOwner(UUID uuid) {
+        this.skullOwner = () -> uuid;
+        return this;
+    }
+
+    public Button setSkullOwner(Supplier<UUID> skullOwnerSupplier) {
+        this.skullOwner = skullOwnerSupplier;
+        return this;
+    }
+
     public Button addClickAction(ClickType clickType, Consumer<Player> clickAction) {
         clickActions.computeIfAbsent(clickType, k -> new ArrayList<>()).add(clickAction);
         return this;
@@ -103,19 +113,24 @@ public class Button {
         return true;
     }
 
-    // --- Main build method ---
     public ItemStack build() {
-        ItemStack item = new ItemStack(material.get(), (amount.get() > 0) ? amount.get() : 1);
+        Material mat = material.get();
+        ItemStack item = new ItemStack(mat, (amount.get() > 0) ? amount.get() : 1);
         ItemMeta meta = item.getItemMeta();
 
+        // Potion support
         if (meta instanceof PotionMeta potionMeta) {
-            // potionType is optional; only apply when configured
-            Supplier<PotionType> supplier = this.potionType;
-            if (supplier != null) {
-                PotionType type = supplier.get();
-                if (type != null) {
-                    potionMeta.setBasePotionType(type);
-                }
+            PotionType type = this.potionType.get();
+            if (type != null) {
+                potionMeta.setBasePotionType(type);
+            }
+        }
+
+        // Skull support
+        if (meta instanceof SkullMeta skullMeta && mat == Material.PLAYER_HEAD) {
+            UUID owner = this.skullOwner.get();
+            if (owner != null) {
+                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(owner));
             }
         }
 
@@ -124,6 +139,7 @@ public class Button {
             meta.setLore(lines.get());
             item.setItemMeta(meta);
         }
+
         return item;
     }
 
