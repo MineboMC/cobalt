@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.ClickType;
 
 import java.util.function.Consumer;
 
-public class ConfirmMenu {
+public class ConfirmMenu extends Menu {
 
     private final String title;
     private final Consumer<Boolean> callback;

@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.ClickType;
 
 import java.util.*;
 
-public abstract class PaginatedMenu {
+public abstract class PaginatedMenu extends Menu {
 
     /**
      * -- GETTER --
