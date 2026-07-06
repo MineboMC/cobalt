@@ -1,6 +1,7 @@
 package net.minebo.cobalt.menu.impl.menu;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.minebo.cobalt.menu.construct.Button;
 import net.minebo.cobalt.menu.construct.Menu;
 import org.bukkit.ChatColor;
@@ -120,28 +121,29 @@ public abstract class PaginatedMenu extends Menu {
      */
     public final Button getPreviousPageButton() {
         boolean canGoBack = currentPage > 0;
-        
-        return new Button()
-                .setName(canGoBack ? ChatColor.YELLOW + "« Previous Page" : ChatColor.GRAY + "« Previous Page")
-                .setLines(
-                        "",
-                        canGoBack 
-                            ? ChatColor.GRAY + "Click to go to page " + ChatColor.YELLOW + currentPage
-                            : ChatColor.RED + "You are on the first page"
-                )
-                .setMaterial(canGoBack ? Material.ARROW : Material.ARROW)
-                .addClickAction(ClickType.LEFT, p -> {
-                    if (currentPage > 0) {
-                        currentPage--;
-                        openMenu(player);
-                    }
-                })
-                .addClickAction(ClickType.RIGHT, p -> {
-                    if (currentPage > 0) {
-                        currentPage--;
-                        openMenu(player);
-                    }
-                });
+
+        if (canGoBack) {
+            return new Button()
+                    .setName(ChatColor.GREEN + "⬅")
+                    .setLines(
+                            ChatColor.GRAY + "Click to go to previous page",
+                            "",
+                            ChatColor.YELLOW + "(" + currentPage + "/" + maxPages + ")"
+                    )
+                    .setMaterial(Material.LIGHT_BLUE_CARPET)
+                    .addClickAction(ClickType.LEFT, p -> {
+                        if (currentPage > 0) {
+                            currentPage--;
+                            openMenu(player);
+                        }
+                    });
+        } else {
+            return new Button()
+                    .setName(ChatColor.GRAY + "First Page")
+                    .setLines(ChatColor.RED + "You are on the first page")
+                    .setMaterial(Material.GRAY_CARPET)
+                    .addClickAction(ClickType.LEFT, p -> {});
+        }
     }
 
     /**
@@ -150,28 +152,29 @@ public abstract class PaginatedMenu extends Menu {
      */
     public final Button getNextPageButton() {
         boolean canGoForward = currentPage < maxPages - 1;
-        
-        return new Button()
-                .setName(canGoForward ? ChatColor.YELLOW + "Next Page »" : ChatColor.GRAY + "Next Page »")
-                .setLines(
-                        "",
-                        canGoForward 
-                            ? ChatColor.GRAY + "Click to go to page " + ChatColor.YELLOW + (currentPage + 2)
-                            : ChatColor.RED + "You are on the last page"
-                )
-                .setMaterial(canGoForward ? Material.ARROW : Material.ARROW)
-                .addClickAction(ClickType.LEFT, p -> {
-                    if (currentPage < maxPages - 1) {
-                        currentPage++;
-                        openMenu(player);
-                    }
-                })
-                .addClickAction(ClickType.RIGHT, p -> {
-                    if (currentPage < maxPages - 1) {
-                        currentPage++;
-                        openMenu(player);
-                    }
-                });
+
+        if (canGoForward) {
+            return new Button()
+                    .setName(ChatColor.GREEN + "➔")
+                    .setLines(
+                            ChatColor.GRAY + "Click to go to next page",
+                            "",
+                            ChatColor.YELLOW + "(" + (currentPage + 2) + "/" + maxPages + ")"
+                    )
+                    .setMaterial(Material.LIGHT_BLUE_CARPET)
+                    .addClickAction(ClickType.LEFT, p -> {
+                        if (currentPage < maxPages - 1) {
+                            currentPage++;
+                            openMenu(player);
+                        }
+                    });
+        } else {
+            return new Button()
+                    .setName(ChatColor.GRAY + "Last Page")
+                    .setLines(ChatColor.RED + "You are on the last page")
+                    .setMaterial(Material.GRAY_CARPET)
+                    .addClickAction(ClickType.LEFT, p -> {});
+        }
     }
 
     /**
@@ -236,7 +239,8 @@ public abstract class PaginatedMenu extends Menu {
         Menu menu = new Menu()
                 .setTitle(getTitle(player))
                 .setSize(displaySize)
-                .setUpdateAfterClick(false);
+                .setAutoUpdate(true)
+                .setUpdateAfterClick(true);
 
         // Add header items
         Map<Integer, Button> headerItems = getHeaderItems(player);
