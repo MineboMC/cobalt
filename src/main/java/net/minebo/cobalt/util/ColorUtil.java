@@ -31,11 +31,8 @@ public class ColorUtil {
     public static String legacyToMiniMessage(String text) {
         if (text == null) return "";
 
-        // Replace § with & for consistency
         text = text.replace('§', '&');
-
-        // Handle hex colors &#RRGGBB
-        text = text.replaceAll("&?#([A-Fa-f0-9]{6})", "<#$1>");
+        text = text.replaceAll("(?<!<)&?#([A-Fa-f0-9]{6})", "<#$1>");
 
         // Standard color codes
         text = text.replace("&0", "<black>");
