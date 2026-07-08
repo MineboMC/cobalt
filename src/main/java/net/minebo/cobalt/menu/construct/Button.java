@@ -3,7 +3,6 @@ package net.minebo.cobalt.menu.construct;
 import lombok.AllArgsConstructor;
 import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -52,14 +51,14 @@ public class Button {
 
     public Button setLines(String... dynamicLines) {
         this.lines = () -> Arrays.stream(dynamicLines)
-                .map(line -> ColorUtil.translateColors((line)))
+                .map(ColorUtil::translateColors)
                 .toList();
         return this;
     }
 
     public Button setLines(Supplier<List<String>> linesSupplier) {
         this.lines = () -> linesSupplier.get().stream()
-                .map(line -> ColorUtil.translateColors((line)))
+                .map(ColorUtil::translateColors)
                 .toList();
         return this;
     }

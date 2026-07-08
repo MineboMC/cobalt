@@ -47,9 +47,7 @@ public final class StringUtils {
       String colored = ColorUtil.translateColors(input);
       String lastColors = org.bukkit.ChatColor.getLastColors(colored);
 
-      if (lastColors.isEmpty()) {
-         return null;
-      }
+      if (lastColors.isEmpty()) return null;
 
       try {
          if (MINOR_VERSION >= 16 && lastColors.contains("§x")) {
@@ -58,11 +56,10 @@ public final class StringUtils {
             return ChatColor.of(hex);
          }
 
-         // Legacy color fallback
+         // Legacy fallback
          char code = lastColors.charAt(lastColors.length() - 1);
          org.bukkit.ChatColor bukkitColor = org.bukkit.ChatColor.getByChar(code);
          return bukkitColor != null ? bukkitColor.asBungee() : null;
-
       } catch (Exception e) {
          return null;
       }
@@ -71,10 +68,10 @@ public final class StringUtils {
    public static String color(String text) {
       if (text == null) return "";
 
-      // Main color processing through ColorUtil (MiniMessage + legacy)
+      // Main processing through ColorUtil (MiniMessage)
       text = ColorUtil.translateColors(text);
 
-      // Extra pass to convert remaining <#hex> for tablist compatibility
+      // Extra pass for hex colors in tablist (1.16+)
       if (MINOR_VERSION >= 16) {
          Matcher matcher = hexPattern.matcher(text);
          while (matcher.find()) {

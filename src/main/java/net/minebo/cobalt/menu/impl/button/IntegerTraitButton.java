@@ -2,7 +2,7 @@ package net.minebo.cobalt.menu.impl.button;
 
 import com.google.common.base.Preconditions;
 import net.minebo.cobalt.menu.construct.Button;
-import org.bukkit.ChatColor;
+import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -31,17 +31,12 @@ public class IntegerTraitButton<T> extends Button {
     private final int incrementAmount;
     private final int shiftIncrementAmount;
 
-    /**
-     * Create a new integer trait button with default bounds (0-100) and increment (1)
-     */
     public IntegerTraitButton(T object, String traitName, BiConsumer<T, Integer> setter, Function<T, Integer> getter, Consumer<T> saveCallback) {
         this(object, traitName, setter, getter, saveCallback, 0, 100, 1, 0);
     }
 
-    /**
-     * Create a new integer trait button with custom bounds and increments
-     */
-    public IntegerTraitButton(T object, String traitName, BiConsumer<T, Integer> setter, Function<T, Integer> getter, Consumer<T> saveCallback, int minValue, int maxValue, int incrementAmount, int shiftIncrementAmount) {
+    public IntegerTraitButton(T object, String traitName, BiConsumer<T, Integer> setter, Function<T, Integer> getter, Consumer<T> saveCallback,
+                              int minValue, int maxValue, int incrementAmount, int shiftIncrementAmount) {
         this.object = Preconditions.checkNotNull(object, "object");
         this.traitName = Preconditions.checkNotNull(traitName, "traitName");
         this.setter = Preconditions.checkNotNull(setter, "setter");
@@ -52,11 +47,9 @@ public class IntegerTraitButton<T> extends Button {
         this.incrementAmount = incrementAmount;
         this.shiftIncrementAmount = shiftIncrementAmount;
 
-        // Normal clicks = small increment
         addClickAction(ClickType.LEFT, p -> handleClick(p, true, incrementAmount));
         addClickAction(ClickType.RIGHT, p -> handleClick(p, false, incrementAmount));
-        
-        // Shift clicks = large increment
+
         if (shiftIncrementAmount > 0) {
             addClickAction(ClickType.SHIFT_LEFT, p -> handleClick(p, true, shiftIncrementAmount));
             addClickAction(ClickType.SHIFT_RIGHT, p -> handleClick(p, false, shiftIncrementAmount));
@@ -66,56 +59,53 @@ public class IntegerTraitButton<T> extends Button {
     @Override
     public ItemStack build() {
         int currentValue = getter.apply(object);
-        
+
         ItemStack item = new ItemStack(Material.PAPER);
-        item.setAmount(Math.min(64, Math.max(1, currentValue))); // Visual indicator
-        
+        item.setAmount(Math.min(64, Math.max(1, currentValue)));
+
         ItemMeta meta = item.getItemMeta();
-        
         if (meta != null) {
-            meta.setDisplayName(ChatColor.YELLOW.toString() + ChatColor.BOLD + traitName);
-            
+            meta.setDisplayName(ColorUtil.translateColors("<yellow><bold>" + traitName));
+
             List<String> lore = new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.GRAY + "Current Value: " + ChatColor.WHITE + currentValue);
+            lore.add(ColorUtil.translateColors("<gray>Current Value: <white>" + currentValue));
             lore.add("");
-            lore.add(ChatColor.GREEN + "▲ Left Click: " + ChatColor.GRAY + "+" + incrementAmount);
-            if (shiftIncrementAmount > 0) lore.add(ChatColor.GREEN + "▲ Shift + Left Click: " + ChatColor.GRAY + "+" + shiftIncrementAmount);
-            lore.add(ChatColor.RED + "▼ Right Click: " + ChatColor.GRAY + "-" + incrementAmount);
-            if (shiftIncrementAmount > 0) lore.add(ChatColor.RED + "▼ Shift + Right Click: " + ChatColor.GRAY + "-" + shiftIncrementAmount);
+            lore.add(ColorUtil.translateColors("<green>▲ Left Click: <gray>+" + incrementAmount));
+            if (shiftIncrementAmount > 0) {
+                lore.add(ColorUtil.translateColors("<green>▲ Shift + Left Click: <gray>+" + shiftIncrementAmount));
+            }
+            lore.add(ColorUtil.translateColors("<red>▼ Right Click: <gray>-" + incrementAmount));
+            if (shiftIncrementAmount > 0) {
+                lore.add(ColorUtil.translateColors("<red>▼ Shift + Right Click: <gray>-" + shiftIncrementAmount));
+            }
             lore.add("");
-            lore.add(ChatColor.GRAY + "Range: " + ChatColor.YELLOW + minValue + ChatColor.GRAY + " - " + ChatColor.YELLOW + maxValue);
-            
+            lore.add(ColorUtil.translateColors("<gray>Range: <yellow>" + minValue + "<gray> - <yellow>" + maxValue));
+
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
-        
+
         return item;
     }
 
     private void handleClick(Player player, boolean increment, int amount) {
         int currentValue = getter.apply(object);
-        int newValue;
-        
-        if (increment) {
-            newValue = Math.min(maxValue, currentValue + amount);
-        } else {
-            newValue = Math.max(minValue, currentValue - amount);
-        }
-        
-        // Check if value actually changed
+        int newValue = increment
+                ? Math.min(maxValue, currentValue + amount)
+                : Math.max(minValue, currentValue - amount);
+
         if (newValue == currentValue) {
             String limit = increment ? "maximum" : "minimum";
-            player.sendMessage(ChatColor.RED + "Already at " + limit + " value (" + currentValue + ")");
+            player.sendMessage(ColorUtil.translateColors("<red>Already at " + limit + " value (" + currentValue + ")"));
             return;
         }
-        
-        // Update value
+
         setter.accept(object, newValue);
         saveCallback.accept(object);
-        
-        // Send feedback
-        String direction = increment ? ChatColor.GREEN + "increased" : ChatColor.RED + "decreased";
-        player.sendMessage(ChatColor.YELLOW + traitName + " has been " + direction + ChatColor.YELLOW + " to " + ChatColor.WHITE + newValue + ChatColor.YELLOW + ".");
+
+        String direction = increment ? "<green>increased" : "<red>decreased";
+        player.sendMessage(ColorUtil.translateColors("<yellow>" + traitName + " has been " + direction +
+                "<yellow> to <white>" + newValue + "<yellow>."));
     }
 }

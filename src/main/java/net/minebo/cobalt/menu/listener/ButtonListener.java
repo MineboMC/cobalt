@@ -14,16 +14,13 @@ public class ButtonListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        Player player = (Player) event.getWhoClicked();
         String playerName = player.getName();
-
         Inventory clickedInventory = event.getClickedInventory();
         if (clickedInventory == null) return;
 
         Inventory topInventory = event.getView().getTopInventory();
-
         if (!clickedInventory.equals(topInventory)) return;
 
         Menu menu = MenuHandler.getPlayerMenu(playerName);
@@ -31,19 +28,22 @@ public class ButtonListener implements Listener {
 
         int slot = event.getSlot();
 
+        if (slot < 0 || slot >= topInventory.getSize()) {
+            event.setCancelled(true);
+            return;
+        }
+
         if (!menu.buttonSuppliers.containsKey(slot)) {
             // No button in this slot
-            if (!menu.nonCancelling) {  // Only cancel if the menu is not set to noncancelling
+            if (!menu.nonCancelling) {
                 event.setCancelled(true);
             }
             return;
         }
 
         Button button = menu.buttonSuppliers.get(slot).get();
-
         if (button == null) {
-            // Null button
-            if (!menu.nonCancelling) {  // Only cancel if the menu is not set to noncancelling
+            if (!menu.nonCancelling) {
                 event.setCancelled(true);
             }
             return;
@@ -63,5 +63,4 @@ public class ButtonListener implements Listener {
             MenuHandler.updateMenu(player, menu);
         }
     }
-
 }

@@ -18,20 +18,14 @@ import java.util.function.Supplier;
 public class MenuHandler {
 
     public static JavaPlugin plugin;
-
-    public static Map<String, Inventory> currentlyOpenedMenus;
-    public static Map<String, BukkitRunnable> checkTasks;
-
+    public static Map<String, Inventory> currentlyOpenedMenus = new HashMap<>();
+    public static Map<String, BukkitRunnable> checkTasks = new HashMap<>();
     public static Map<String, Menu> playerMenus = new HashMap<>();
 
     public static void init(JavaPlugin plugin) {
         MenuHandler.plugin = plugin;
-
         Bukkit.getPluginManager().registerEvents(new ButtonListener(), plugin);
         Bukkit.getPluginManager().registerEvents(new MenuListener(), plugin);
-
-        currentlyOpenedMenus = new HashMap();
-        checkTasks = new HashMap();
     }
 
     public static void startAutoUpdate(Player player, Menu menu) {
@@ -43,25 +37,28 @@ public class MenuHandler {
                 updateMenu(player, menu);
             }
         };
-
-        task.runTaskTimer(plugin, 20L, 20L); // runs every second
+        task.runTaskTimer(plugin, 20L, 20L); // every second
         checkTasks.put(player.getName(), task);
     }
 
     public static void stopAutoUpdate(Player player) {
         BukkitRunnable task = checkTasks.remove(player.getName());
-        if (task != null) {
-            task.cancel();
-        }
+        if (task != null) task.cancel();
     }
 
     public static void updateMenu(Player player, Menu menu) {
         Inventory inv = currentlyOpenedMenus.get(player.getName());
-
         if (inv == null) return;
+
         for (Map.Entry<Integer, Supplier<Button>> entry : menu.buttonSuppliers.entrySet()) {
+            int slot = entry.getKey();
+            // SAFETY CHECK - prevent out of bounds
+            if (slot < 0 || slot >= inv.getSize()) continue;
+
             Button freshButton = entry.getValue().get();
-            inv.setItem(entry.getKey(), freshButton.build());
+            if (freshButton != null) {
+                inv.setItem(slot, freshButton.build());
+            }
         }
 
         player.updateInventory();
@@ -70,5 +67,4 @@ public class MenuHandler {
     public static Menu getPlayerMenu(String playerName) {
         return playerMenus.get(playerName);
     }
-
 }

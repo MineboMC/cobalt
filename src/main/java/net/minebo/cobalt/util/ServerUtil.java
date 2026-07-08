@@ -1,8 +1,5 @@
 package net.minebo.cobalt.util;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-
 import java.lang.reflect.Field;
 
 public class ServerUtil {
@@ -11,10 +8,10 @@ public class ServerUtil {
         double tps = getTPS();
 
         return ((tps > 18.0)
-                ? ChatColor.GREEN
+                ? ColorUtil.translateColors("<green>")
                 : ((tps > 16.0)
-                ? ChatColor.YELLOW
-                : ChatColor.RED)
+                ? ColorUtil.translateColors("<yellow>")
+                : ColorUtil.translateColors("<red>"))
         ) + ((tps > 20.0) ? "*" : "") + Math.min(Math.round(tps * 100.0) / 100.0, 20.0);
     }
 

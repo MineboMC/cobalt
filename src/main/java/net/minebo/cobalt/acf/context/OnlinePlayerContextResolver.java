@@ -4,24 +4,24 @@ import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import co.aikar.commands.contexts.ContextResolver;
+import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class OnlinePlayerContextResolver implements ContextResolver<OnlinePlayer, BukkitCommandExecutionContext> {
-   public OnlinePlayer getContext(BukkitCommandExecutionContext c) {
+
+   public OnlinePlayer getContext(BukkitCommandExecutionContext c) throws InvalidCommandArgument {
       String input = c.popFirstArg();
       Player target = Bukkit.getPlayerExact(input);
+
       if (target != null) {
          if (!target.hasMetadata("vanished")) {
             return new OnlinePlayer(target);
          } else {
-            String var4 = String.valueOf(ChatColor.RED);
-            throw new InvalidCommandArgument(var4 + input + " is not online.");
+            throw new InvalidCommandArgument(ColorUtil.translateColors("<red>" + input + " is not online."));
          }
       } else {
-         String var10002 = String.valueOf(ChatColor.RED);
-         throw new InvalidCommandArgument(var10002 + input + " is not online.");
+         throw new InvalidCommandArgument(ColorUtil.translateColors("<red>" + input + " is not online."));
       }
    }
 }
