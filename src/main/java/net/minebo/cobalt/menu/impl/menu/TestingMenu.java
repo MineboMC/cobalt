@@ -16,11 +16,11 @@ public class TestingMenu extends Menu {
         setAutoUpdate(true);
 
         setButton(0, new Button()
-                .setName("#F4D654&lT#F6D552&le#F7D451&ls#F9D34F&lt#FAD14E&li#FCD04C&ln#FDCF4B&lg #FFCB3D&lB#FFC731&lu#FFC425&lt#FFC118&lt#FFBD0C&lo#FFBA00&ln")
+                .setName("Test")
                 .setLines(
-                        "&aUpdating",
-                        "&eButton",
-                        "&dCurrent System Milis: &f" + System.currentTimeMillis()
+                        "<green>Updating",
+                        "<yellow>Button",
+                        "<light_purple>Current System Milis: <white>" + System.currentTimeMillis()
                 )
 
                 .setMaterial(Material.BOOK)

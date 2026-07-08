@@ -10,11 +10,11 @@ import org.bukkit.entity.Player;
 
 public class ExampleAdapter implements TabAdapter {
    public String getHeader(Player player) {
-      return "&3&lwww.ForestBukkit.com";
+      return "Header";
    }
 
    public String getFooter(Player player) {
-      return "&9Home of &dMCRaidz&9!";
+      return "Footer";
    }
 
    public List getLines(Player player) {

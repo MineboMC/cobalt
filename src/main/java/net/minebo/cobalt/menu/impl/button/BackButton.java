@@ -10,8 +10,8 @@ import org.bukkit.event.inventory.ClickType;
 public class BackButton extends Button {
 
     public BackButton(Player player, Menu menu) {
-        this.setName(ColorUtil.translateColors("&cBack"));
-        this.setLines(ColorUtil.translateColors("&7Click to go back."));
+        this.setName(ColorUtil.translateColors("<red>Back"));
+        this.setLines(ColorUtil.translateColors("<gray>Click to go back."));
         this.setMaterial(Material.RED_DYE);
 
         this.addClickAction(ClickType.LEFT, menu::openMenu);

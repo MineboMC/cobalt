@@ -36,7 +36,7 @@ public class ColorUtil {
         if (message == null) return null;
 
         // Translate & codes + hex first
-        String legacy = ChatColor.translateAlternateColorCodes('&', translateHexColors(message));
+        String legacy = ColorUtil.translateColors(translateHexColors(message));
 
         // Then parse MiniMessage
         Component component = MINI_MESSAGE.deserialize(legacy);

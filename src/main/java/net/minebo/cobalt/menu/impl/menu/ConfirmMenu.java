@@ -20,16 +20,16 @@ public class ConfirmMenu extends Menu {
 
     public void openMenu(Player player) {
         Menu menu = new Menu()
-                .setTitle("&cConfirm: " + title)
+                .setTitle("<green>Confirm: " + title)
                 .setSize(27);
 
         // Confirm button (green wool) at slot 11
         Button confirmButton = new Button()
                 .setMaterial(Material.GREEN_WOOL)
                 .setAmount(1)
-                .setName("&a&lConfirm")
+                .setName("<green><bold>Confirm")
                 .setLines(
-                        "&7Click to confirm this action."
+                        "<gray>Click to confirm this action."
                 )
                 .addClickAction(ClickType.LEFT, (p) -> {
                     p.closeInventory();
@@ -46,9 +46,9 @@ public class ConfirmMenu extends Menu {
         Button cancelButton = new Button()
                 .setMaterial(Material.RED_WOOL)
                 .setAmount(1)
-                .setName("&c&lCancel")
+                .setName("<red><bold>Cancel")
                 .setLines(
-                        "&7Click to cancel this action."
+                        "<gray>Click to cancel this action."
                 )
                 .addClickAction(ClickType.LEFT, (p) -> {
                     p.closeInventory();

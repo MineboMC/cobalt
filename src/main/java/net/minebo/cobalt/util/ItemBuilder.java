@@ -66,7 +66,7 @@ public class ItemBuilder {
 
     public ItemBuilder setName(String name) {
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', ColorUtil.translateHexColors(name)));
+        meta.setDisplayName(ColorUtil.translateColors(name));
         itemStack.setItemMeta(meta);
         return this;
     }

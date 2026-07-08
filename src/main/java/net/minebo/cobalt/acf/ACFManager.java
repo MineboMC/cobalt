@@ -20,19 +20,19 @@ public class ACFManager {
    public CommandHelpFormatter helpFormatter = (new CommandHelpFormatter(ACFCommandController.commandController) {
       @Override
       public void printHelpHeader(CommandHelp help, CommandIssuer issuer) {
-         issuer.sendMessage(ColorUtil.translateColors("&6=== &fShowing help for &e/" + help.getCommandName() + " &6==="));
+         issuer.sendMessage(ColorUtil.translateColors("<gold>=== <white>Showing help for <yellow>/" + help.getCommandName() + " <gold>==="));
       }
 
       @Override
       public void printHelpCommand(CommandHelp help, CommandIssuer issuer, HelpEntry entry) {
-         issuer.sendMessage(ColorUtil.translateColors("&e" + entry.getCommand() + "&f " + entry.getParameterSyntax() + " &8- &7" + entry.getDescription()));
+         issuer.sendMessage(ColorUtil.translateColors("<yellow>" + entry.getCommand() + "<white> " + entry.getParameterSyntax() + " <dark_gray>- <gray>" + entry.getDescription()));
       }
 
       @Override
       public void printHelpFooter(CommandHelp help, CommandIssuer issuer) {
          if (help.isOnlyPage()) return;
 
-         issuer.sendMessage(ColorUtil.translateColors("&f- Showing page &e" + help.getPage() + " &fof &e" + help.getTotalPages() + " &7(" + help.getTotalResults() + " entries)"));
+         issuer.sendMessage(ColorUtil.translateColors("<white>- Showing page <yellow>" + help.getPage() + " <white>of <yellow>" + help.getTotalPages() + " <gray>(" + help.getTotalResults() + " entries)"));
       }
    });
 

@@ -5,11 +5,11 @@ import org.bukkit.entity.Player;
 
 public class ScoreboardProvider {
     public String getModernTitle(Player player) {
-       return "&d&lMCRaidz";
+       return "<light_purple><bold>MCRaidz";
     }
 
     public List<String> getModernLines(Player player) {
-       return List.of("&ccoming soon...");
+       return List.of("<red>coming soon...");
     }
 
     public String getLegacyTitle(Player player) {

@@ -74,7 +74,7 @@ public class PotionBuilder {
      */
     public PotionBuilder setName(String name) {
         if (itemMeta == null) itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+        itemMeta.setDisplayName(ColorUtil.translateColors(name));
         if (itemMeta instanceof PotionMeta) potionMeta = (PotionMeta) itemMeta;
         return this;
     }

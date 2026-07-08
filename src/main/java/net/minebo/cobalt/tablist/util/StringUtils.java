@@ -3,6 +3,7 @@ package net.minebo.cobalt.tablist.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Generated;
+import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -72,7 +73,7 @@ public final class StringUtils {
       if (text == null) {
          return "";
       } else {
-         text = ChatColor.translateAlternateColorCodes('&', text);
+         text = ColorUtil.translateColors(text);
          if (MINOR_VERSION >= 16) {
             Matcher matcher = hexPattern.matcher(text);
 
