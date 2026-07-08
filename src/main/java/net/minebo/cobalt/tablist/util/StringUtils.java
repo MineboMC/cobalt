@@ -1,104 +1,97 @@
 package net.minebo.cobalt.tablist.util;
 
+import net.minebo.cobalt.util.ColorUtil;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.Generated;
-import net.minebo.cobalt.util.ColorUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 public final class StringUtils {
+
    public static final int MINOR_VERSION;
-   private static final Pattern hexPattern = Pattern.compile("&#[A-Fa-f0-9]{6}");
+
+   // Supports MiniMessage hex format <#RRGGBB>
+   private static final Pattern hexPattern = Pattern.compile("<#[A-Fa-f0-9]{6}>");
 
    public static String[] split(String text) {
+      if (text == null) return new String[]{"", ""};
       if (text.length() <= 16) {
          return new String[]{text, ""};
-      } else {
-         String prefix = text.substring(0, 16);
-         String suffix;
-         if (prefix.charAt(15) != 167 && prefix.charAt(15) != '&') {
-            if (prefix.charAt(14) != 167 && prefix.charAt(14) != '&') {
-               String lastColor = ChatColor.getLastColors(prefix);
-               suffix = lastColor + text.substring(16);
-            } else {
-               prefix = prefix.substring(0, 14);
-               suffix = text.substring(14);
-            }
-         } else {
-            prefix = prefix.substring(0, 15);
-            suffix = text.substring(15);
-         }
-
-         if (suffix.length() > 16) {
-            suffix = suffix.substring(0, 16);
-         }
-
-         return new String[]{prefix, suffix};
       }
+
+      String prefix = text.substring(0, 16);
+      String suffix;
+
+      if (prefix.charAt(15) == '§' || prefix.charAt(15) == '&') {
+         prefix = prefix.substring(0, 15);
+         suffix = text.substring(15);
+      } else if (prefix.charAt(14) == '§' || prefix.charAt(14) == '&') {
+         prefix = prefix.substring(0, 14);
+         suffix = text.substring(14);
+      } else {
+         String lastColor = org.bukkit.ChatColor.getLastColors(prefix);
+         suffix = lastColor + text.substring(16);
+      }
+
+      if (suffix.length() > 16) {
+         suffix = suffix.substring(0, 16);
+      }
+
+      return new String[]{prefix, suffix};
    }
 
-   public static net.md_5.bungee.api.ChatColor getLastColors(String input) {
-      String prefixColor = ChatColor.getLastColors(color(input));
-      if (prefixColor.isEmpty()) {
+   public static ChatColor getLastColors(String input) {
+      if (input == null) return null;
+
+      String colored = ColorUtil.translateColors(input);
+      String lastColors = org.bukkit.ChatColor.getLastColors(colored);
+
+      if (lastColors.isEmpty()) {
          return null;
-      } else {
-         net.md_5.bungee.api.ChatColor color;
-         if (MINOR_VERSION >= 16) {
-            try {
-               String hexColor = prefixColor.replace("§", "").replace("x", "#");
-               color = net.md_5.bungee.api.ChatColor.of(hexColor);
-            } catch (Exception var5) {
-               ChatColor bukkitColor = ChatColor.getByChar(prefixColor.substring(prefixColor.length() - 1).charAt(0));
-               if (bukkitColor == null) {
-                  return null;
-               }
+      }
 
-               color = bukkitColor.asBungee();
-            }
-         } else {
-            ChatColor bukkitColor = ChatColor.getByChar(prefixColor.substring(prefixColor.length() - 1).charAt(0));
-            if (bukkitColor == null) {
-               return null;
-            }
-
-            color = bukkitColor.asBungee();
+      try {
+         if (MINOR_VERSION >= 16 && lastColors.contains("§x")) {
+            // Convert §x§r§r§g§g§b§b to #RRGGBB
+            String hex = lastColors.replace("§", "").replace("x", "#");
+            return ChatColor.of(hex);
          }
 
-         return color;
+         // Legacy color fallback
+         char code = lastColors.charAt(lastColors.length() - 1);
+         org.bukkit.ChatColor bukkitColor = org.bukkit.ChatColor.getByChar(code);
+         return bukkitColor != null ? bukkitColor.asBungee() : null;
+
+      } catch (Exception e) {
+         return null;
       }
    }
 
    public static String color(String text) {
-      if (text == null) {
-         return "";
-      } else {
-         text = ColorUtil.translateColors(text);
-         if (MINOR_VERSION >= 16) {
-            Matcher matcher = hexPattern.matcher(text);
+      if (text == null) return "";
 
-            while(matcher.find()) {
-               try {
-                  String color = matcher.group();
-                  String hexColor = color.replace("&", "").replace("x", "#");
-                  net.md_5.bungee.api.ChatColor bungeeColor = net.md_5.bungee.api.ChatColor.of(hexColor);
-                  text = text.replace(color, bungeeColor.toString());
-               } catch (Exception var5) {
-               }
-            }
+      // Main color processing through ColorUtil (MiniMessage + legacy)
+      text = ColorUtil.translateColors(text);
+
+      // Extra pass to convert remaining <#hex> for tablist compatibility
+      if (MINOR_VERSION >= 16) {
+         Matcher matcher = hexPattern.matcher(text);
+         while (matcher.find()) {
+            try {
+               String match = matcher.group();
+               String hex = match.replace("<#", "#").replace(">", "");
+               ChatColor bungeeColor = ChatColor.of(hex);
+               text = text.replace(match, bungeeColor.toString());
+            } catch (Exception ignored) {}
          }
-
-         return text;
       }
+
+      return text;
    }
 
    static {
       Matcher matcher = Pattern.compile("MC: \\d\\.(\\d+)").matcher(Bukkit.getVersion());
-      if (matcher.find()) {
-         MINOR_VERSION = Integer.parseInt(matcher.group(1));
-      } else {
-         MINOR_VERSION = 8;
-      }
-
+      MINOR_VERSION = matcher.find() ? Integer.parseInt(matcher.group(1)) : 8;
    }
 }

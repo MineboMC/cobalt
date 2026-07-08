@@ -41,25 +41,25 @@ public class Button {
     }
 
     public Button setName(String name) {
-        this.name = () -> ColorUtil.translateColors(ColorUtil.translateHexColors(name));
+        this.name = () -> ColorUtil.translateColors((name));
         return this;
     }
 
     public Button setName(Supplier<String> nameSupplier) {
-        this.name = () -> ColorUtil.translateColors(ColorUtil.translateHexColors(nameSupplier.get()));
+        this.name = () -> ColorUtil.translateColors((nameSupplier.get()));
         return this;
     }
 
     public Button setLines(String... dynamicLines) {
         this.lines = () -> Arrays.stream(dynamicLines)
-                .map(line -> ColorUtil.translateColors(ColorUtil.translateHexColors(line)))
+                .map(line -> ColorUtil.translateColors((line)))
                 .toList();
         return this;
     }
 
     public Button setLines(Supplier<List<String>> linesSupplier) {
         this.lines = () -> linesSupplier.get().stream()
-                .map(line -> ColorUtil.translateColors(ColorUtil.translateHexColors(line)))
+                .map(line -> ColorUtil.translateColors((line)))
                 .toList();
         return this;
     }
