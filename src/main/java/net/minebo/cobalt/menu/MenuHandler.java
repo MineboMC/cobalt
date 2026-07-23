@@ -7,17 +7,15 @@ import net.minebo.cobalt.menu.listener.MenuListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class MenuHandler {
-
     public static JavaPlugin plugin;
+
     public static Map<String, Inventory> currentlyOpenedMenus = new HashMap<>();
     public static Map<String, BukkitRunnable> checkTasks = new HashMap<>();
     public static Map<String, Menu> playerMenus = new HashMap<>();
@@ -29,15 +27,22 @@ public class MenuHandler {
     }
 
     public static void startAutoUpdate(Player player, Menu menu) {
-        if (!menu.autoUpdate) return;
+        if (!menu.autoUpdate || player == null) return;
+        stopAutoUpdate(player);
 
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                updateMenu(player, menu);
+                Menu current = playerMenus.get(player.getName());
+                if (current != null) {
+                    updateMenu(player, current);
+                } else {
+                    cancel();
+                }
             }
         };
-        task.runTaskTimer(plugin, 20L, 20L); // every second
+
+        task.runTaskTimer(plugin, 20L, 20L);
         checkTasks.put(player.getName(), task);
     }
 
@@ -47,17 +52,27 @@ public class MenuHandler {
     }
 
     public static void updateMenu(Player player, Menu menu) {
+        if (player == null || menu == null) return;
+
         Inventory inv = currentlyOpenedMenus.get(player.getName());
         if (inv == null) return;
 
+        Inventory topInv = player.getOpenInventory().getTopInventory();
+        if (!inv.equals(topInv)) return;
+
+        for (int i = 0; i < menu.size; i++) {
+            if (!menu.nonCancelling || menu.buttonSuppliers.containsKey(i)) {
+                inv.setItem(i, null);
+            }
+        }
+
         for (Map.Entry<Integer, Supplier<Button>> entry : menu.buttonSuppliers.entrySet()) {
             int slot = entry.getKey();
-            // SAFETY CHECK - prevent out of bounds
-            if (slot < 0 || slot >= inv.getSize()) continue;
+            if (slot < 0 || slot >= menu.size) continue;
 
-            Button freshButton = entry.getValue().get();
-            if (freshButton != null) {
-                inv.setItem(slot, freshButton.build());
+            Button button = entry.getValue().get();
+            if (button != null) {
+                inv.setItem(slot, button.build());
             }
         }
 

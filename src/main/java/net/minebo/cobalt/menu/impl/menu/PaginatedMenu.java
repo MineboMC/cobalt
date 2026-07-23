@@ -7,7 +7,6 @@ import net.minebo.cobalt.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-
 import java.util.*;
 
 public abstract class PaginatedMenu extends Menu {
@@ -15,7 +14,6 @@ public abstract class PaginatedMenu extends Menu {
     @Getter
     private final Player player;
     private final int displaySize;
-
     @Getter
     private int currentPage = 0;
     @Getter
@@ -27,18 +25,15 @@ public abstract class PaginatedMenu extends Menu {
     }
 
     public abstract Map<Integer, Button> getPagesButtons(Player player);
-
     public abstract String getTitle(Player player);
 
     public final Map<Integer, Button> getButtonsInRange(Player player) {
         Map<Integer, Button> buttonsInRange = new HashMap<>();
         Map<Integer, Button> allButtons = getPagesButtons(player);
-
         if (allButtons.isEmpty()) return buttonsInRange;
 
         List<Integer> positions = getButtonPositions();
         int buttonsPerPage = getButtonsPerPage();
-
         maxPages = (int) Math.ceil((double) allButtons.size() / buttonsPerPage);
 
         if (currentPage >= maxPages) {
@@ -55,7 +50,6 @@ public abstract class PaginatedMenu extends Menu {
                 buttonsInRange.put(positions.get(positionIndex), buttonList.get(i).getValue());
             }
         }
-
         return buttonsInRange;
     }
 
@@ -63,7 +57,6 @@ public abstract class PaginatedMenu extends Menu {
         List<Integer> positions = new ArrayList<>();
         int start = getButtonsStartAt();
         int perPage = getButtonsPerPage();
-
         for (int i = 0; i < perPage; i++) {
             int row = i / 9;
             int col = i % 9;
@@ -134,10 +127,7 @@ public abstract class PaginatedMenu extends Menu {
     }
 
     public int getButtonsPerPage() {
-        int totalSlots = displaySize;
-        int headerSlots = 9;
-        int footerSlots = 9;
-        return totalSlots - headerSlots - footerSlots;
+        return displaySize - 18; // header + footer
     }
 
     public Map<Integer, Button> getHeaderItems(Player player) {
@@ -152,12 +142,15 @@ public abstract class PaginatedMenu extends Menu {
         return true;
     }
 
+    @Override
     public final void openMenu(Player player) {
         Menu menu = new Menu()
                 .setTitle(getTitle(player))
                 .setSize(displaySize)
                 .setAutoUpdate(true)
                 .setUpdateAfterClick(true);
+
+        menu.clearButtons();
 
         // Header
         Map<Integer, Button> headerItems = getHeaderItems(player);
@@ -169,12 +162,8 @@ public abstract class PaginatedMenu extends Menu {
         // Navigation
         if (maxPages > 1) {
             Pair<Integer, Integer> pos = getPageButtonPositions();
-            if (currentPage > 0) {
-                menu.setButton(pos.getFirst(), getPreviousPageButton());
-            }
-            if (currentPage < maxPages - 1) {
-                menu.setButton(pos.getSecond(), getNextPageButton());
-            }
+            menu.setButton(pos.getFirst(), getPreviousPageButton());
+            menu.setButton(pos.getSecond(), getNextPageButton());
         }
 
         // Page info
@@ -183,6 +172,7 @@ public abstract class PaginatedMenu extends Menu {
         }
 
         menu.fillEmpty(getPlaceholderMaterial(), hidePlaceholderName());
+
         menu.openMenu(player);
     }
 
