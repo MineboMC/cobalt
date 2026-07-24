@@ -7,7 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
-import java.util.Map;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -40,12 +40,12 @@ public class Menu {
         return this;
     }
 
-    public Menu fillEmpty(Material material, Boolean hideName){
+    public Menu fillEmpty(Material material, Boolean hideName) {
         for (int i = 0; i < size; i++) {
-            if(!buttonSuppliers.containsKey(i)){
-                buttonSuppliers.put(i, () -> (hideName) ?
-                        new Button().setMaterial(material).setName(" ") :
-                        new Button().setMaterial(material));
+            if (!buttonSuppliers.containsKey(i)) {
+                buttonSuppliers.put(i, () -> (hideName)
+                        ? new Button().setMaterial(material).setName(" ")
+                        : new Button().setMaterial(material));
             }
         }
         return this;
@@ -71,6 +71,11 @@ public class Menu {
         return this;
     }
 
+    // Basalt-like hook: dynamic menus override this and repopulate buttons each update tick
+    public void rebuild(Player player) {
+        // default no-op for static menus
+    }
+
     public void refresh(Player player) {
         MenuHandler.updateMenu(player, this);
     }
@@ -80,9 +85,12 @@ public class Menu {
     }
 
     public void openMenu(Player player) {
-        Inventory inv = Bukkit.createInventory(null, size, title);
+        int safeSize = normalizeChestSize(size);
+        this.size = safeSize;
 
-        for (int i = 0; i < size; i++) {
+        Inventory inv = Bukkit.createInventory(null, safeSize, title);
+
+        for (int i = 0; i < safeSize; i++) {
             Supplier<Button> supplier = buttonSuppliers.get(i);
             if (supplier != null) {
                 inv.setItem(i, supplier.get().build());
@@ -121,5 +129,11 @@ public class Menu {
             player.setGameMode(originalMode);
             originalMode = null;
         }
+    }
+
+    private int normalizeChestSize(int raw) {
+        int clamped = Math.max(9, Math.min(54, raw));
+        int rem = clamped % 9;
+        return rem == 0 ? clamped : (clamped + (9 - rem));
     }
 }

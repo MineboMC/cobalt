@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -60,15 +61,20 @@ public class MenuHandler {
         Inventory topInv = player.getOpenInventory().getTopInventory();
         if (!inv.equals(topInv)) return;
 
-        for (int i = 0; i < menu.size; i++) {
-            if (!menu.nonCancelling || menu.buttonSuppliers.containsKey(i)) {
-                inv.setItem(i, null);
-            }
+        // Critical: rebuild dynamic buttons each update tick (Basalt-like behavior)
+        menu.rebuild(player);
+
+        int invSize = inv.getSize();
+
+        // hard clear to avoid stale items
+        for (int i = 0; i < invSize; i++) {
+            inv.setItem(i, null);
         }
 
+        // re-render current button suppliers
         for (Map.Entry<Integer, Supplier<Button>> entry : menu.buttonSuppliers.entrySet()) {
             int slot = entry.getKey();
-            if (slot < 0 || slot >= menu.size) continue;
+            if (slot < 0 || slot >= invSize) continue;
 
             Button button = entry.getValue().get();
             if (button != null) {
