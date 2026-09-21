@@ -1,0 +1,9 @@
+# Maven
+target/
+
+# Intellij
+.idea/
+.junie/
+
+# Compile
+*.class
