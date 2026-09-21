@@ -12,6 +12,7 @@ import net.minebo.cobalt.service.menu.MenuService;
 import net.minebo.cobalt.service.nametag.NametagService;
 import net.minebo.cobalt.service.nametag.example.ExampleNametagProvider;
 import net.minebo.cobalt.service.npc.NpcService;
+import net.minebo.cobalt.service.prompt.PromptService;
 import net.minebo.cobalt.service.scheduler.SchedulerService;
 import net.minebo.cobalt.service.scheduler.example.EnderpearlCooldown;
 import net.minebo.cobalt.service.scheduler.example.SaleTimer;
@@ -36,7 +37,7 @@ public class Cobalt extends JavaPlugin {
    }
 
    public void registerServices() {
-      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService());
+      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService());
 
       if(this.getConfig().getBoolean("testing", false)) {
          CobaltAPI.getBossBarService().registerProvider(new ExampleBossBarProvider(), 0);
