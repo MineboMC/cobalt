@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.player.TextureProperty;
 import com.github.retrooper.packetevents.protocol.player.User;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.CobaltAPI;
@@ -260,7 +261,7 @@ public final class NpcService extends CService {
                 }
                 setSkin(npc, skin.get());
                 if (notify != null) {
-                    notify.sendMessage(Component.text("Set " + npc.name() + " skin to " + username));
+                    notify.sendMessage(Component.text("Set " + npc.name() + "'s skin to " + username + "'s.", NamedTextColor.GREEN));
                 }
             });
         });

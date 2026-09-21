@@ -139,15 +139,9 @@ public final class NpcEditorMenu extends Menu {
             return;
         }
 
-        Player target = Bukkit.getPlayerExact(name);
-        if (target == null) {
-            editor.sendMessage(Component.text(name + " isn't online.", NamedTextColor.RED));
-            new NpcEditorMenu(service, npc).openMenu(editor);
-            return;
-        }
+        CobaltAPI.getNpcService().setSkinFromUsername(npc, name, editor);
+        editor.sendMessage(Component.text("Fetching skin for " + name + "...", NamedTextColor.GRAY));
 
-        service.setSkinFromPlayer(npc, target);
-        editor.sendMessage(Component.text("Set " + npc.name() + "'s skin to " + target.getName() + "'s.", NamedTextColor.GREEN));
         new NpcEditorMenu(service, npc).openMenu(editor);
     }
 }
