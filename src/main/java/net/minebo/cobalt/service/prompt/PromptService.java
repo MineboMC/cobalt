@@ -1,10 +1,10 @@
 package net.minebo.cobalt.service.prompt;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.service.CService;
+import net.minebo.cobalt.util.Coloring;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -66,7 +66,7 @@ public class PromptService extends CService implements Listener {
         }, timeoutSeconds * 20L);
         active.put(id, entry);
 
-        player.sendMessage(MiniMessage.miniMessage().deserialize(prompt));
+        player.sendMessage(Coloring.translateColors(prompt));
     }
 
     public boolean isPrompting(Player player) {
