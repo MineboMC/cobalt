@@ -7,6 +7,7 @@ import net.minebo.cobalt.service.ServiceManager;
 import net.minebo.cobalt.service.bossbar.BossBarService;
 import net.minebo.cobalt.service.bossbar.example.ExampleBossBarProvider;
 import net.minebo.cobalt.service.command.CommandService;
+import net.minebo.cobalt.service.deathmessage.DeathMessageService;
 import net.minebo.cobalt.service.hologram.HologramService;
 import net.minebo.cobalt.service.menu.MenuService;
 import net.minebo.cobalt.service.nametag.NametagService;
@@ -37,7 +38,7 @@ public class Cobalt extends JavaPlugin {
    }
 
    public void registerServices() {
-      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService());
+      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService());
 
       if(this.getConfig().getBoolean("testing", false)) {
          CobaltAPI.getBossBarService().registerProvider(new ExampleBossBarProvider(), 0);

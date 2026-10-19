@@ -1,5 +1,6 @@
 package net.minebo.cobalt.service.hologram;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.CobaltAPI;
 import net.minebo.cobalt.service.CService;
@@ -10,6 +11,7 @@ import net.minebo.cobalt.service.hologram.packet.HologramPacketSender;
 import net.minebo.cobalt.service.hologram.registry.HologramRegistry;
 import net.minebo.cobalt.service.hologram.state.HologramTracker;
 import net.minebo.cobalt.service.hologram.task.HologramUpdateTask;
+import net.minebo.cobalt.service.hologram.task.HologramUpdateViewersTask;
 import net.minebo.cobalt.service.store.StoreService;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -28,6 +30,7 @@ public final class HologramService extends CService {
     private HologramListener listener;
     private HologramStore store;
     private BukkitTask task;
+    private BukkitTask updateTask;
 
     @Override
     public String getName() {
@@ -42,7 +45,8 @@ public final class HologramService extends CService {
         api = new HologramApi(this);
         listener = new HologramListener(this);
         Bukkit.getPluginManager().registerEvents(listener, Cobalt.getInstance());
-        task = new HologramUpdateTask().runTaskTimer(Cobalt.getInstance(), 5, 20L);
+        task = new HologramUpdateViewersTask().runTaskTimer(Cobalt.getInstance(), 5, 20L);
+        updateTask = new HologramUpdateTask().runTaskTimer(Cobalt.getInstance(), 5, 5L);
 
         this.useStore(CobaltAPI.getStoreService());
     }
@@ -51,6 +55,9 @@ public final class HologramService extends CService {
     public void onDisable() {
         if (task != null) {
             task.cancel();
+        }
+        if (updateTask != null) {
+            updateTask.cancel();
         }
         HandlerList.unregisterAll(listener);
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -179,7 +186,12 @@ public final class HologramService extends CService {
     public void refresh(Hologram hologram) {
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (tracker.isShown(viewer, hologram)) {
-                List<String> next = List.copyOf(hologram.lines());
+                List<String> next;
+                if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                    next = List.copyOf(hologram.lines()).stream().map(l -> PlaceholderAPI.setPlaceholders(viewer, l)).toList();
+                } else {
+                    next = List.copyOf(hologram.lines());
+                }
                 packets.update(viewer, hologram, tracker.lastLines(viewer, hologram), next);
                 tracker.setLastLines(viewer, hologram, next);
             }

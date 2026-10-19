@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public final class HologramUpdateTask extends BukkitRunnable {
 
     @Override public void run() {
-        CobaltAPI.getHologramService().tickViewers();
+        CobaltAPI.getHologramService().registry().all().forEach(CobaltAPI.getHologramService()::refresh);
     }
+
 }

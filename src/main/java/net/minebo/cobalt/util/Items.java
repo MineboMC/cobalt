@@ -1,5 +1,6 @@
 package net.minebo.cobalt.util;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -230,6 +231,28 @@ public class Items {
         }
 
         return item;
+    }
+
+    public static ItemStack getDyeFromDyeColor(DyeColor color){
+        switch (color) {
+            case BLACK: return new ItemStack(Material.BLACK_DYE);
+            case RED: return new ItemStack(Material.RED_DYE);
+            case GREEN: return new ItemStack(Material.GREEN_DYE);
+            case BROWN: return new ItemStack(Material.BROWN_DYE);
+            case BLUE: return new ItemStack(Material.BLUE_DYE);
+            case PURPLE: return new ItemStack(Material.PURPLE_DYE);
+            case CYAN: return new ItemStack(Material.CYAN_DYE);
+            case LIGHT_GRAY: return new ItemStack(Material.LIGHT_GRAY_DYE);
+            case GRAY: return new ItemStack(Material.GRAY_DYE);
+            case PINK: return new ItemStack(Material.PINK_DYE);
+            case LIME: return new ItemStack(Material.LIME_DYE);
+            case YELLOW: return new ItemStack(Material.YELLOW_DYE);
+            case LIGHT_BLUE: return new ItemStack(Material.LIGHT_BLUE_DYE);
+            case MAGENTA: return new ItemStack(Material.MAGENTA_DYE);
+            case ORANGE: return new ItemStack(Material.ORANGE_DYE);
+            case WHITE: return new ItemStack(Material.WHITE_DYE);
+            default: return new ItemStack(Material.INK_SAC);
+        }
     }
 
     public static List<String> getListOfMaterials(){
