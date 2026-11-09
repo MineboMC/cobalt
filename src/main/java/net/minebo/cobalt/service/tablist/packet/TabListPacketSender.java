@@ -1,6 +1,7 @@
 package net.minebo.cobalt.service.tablist.packet;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
 import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
@@ -51,7 +52,7 @@ public final class TabListPacketSender {
         for (int index = 0; index < count; index++) {
             entries.add(toInfo(state, index, state.slot(index)));
         }
-        send(player, new WrapperPlayServerPlayerInfoUpdate(ADD_ACTIONS, entries));
+        send(player, new WrapperPlayServerPlayerInfoUpdate(supported(ADD_ACTIONS), entries));
         state.setApplied(true);
     }
 
@@ -65,10 +66,10 @@ public final class TabListPacketSender {
         WrapperPlayServerPlayerInfoUpdate.PlayerInfo info = toInfo(state, index, next);
         if (skinChanged) {
             send(player, new WrapperPlayServerPlayerInfoRemove(List.of(state.slotId(index))));
-            send(player, new WrapperPlayServerPlayerInfoUpdate(ADD_ACTIONS, List.of(info)));
+            send(player, new WrapperPlayServerPlayerInfoUpdate(supported(ADD_ACTIONS), List.of(info)));
             return;
         }
-        send(player, new WrapperPlayServerPlayerInfoUpdate(UPDATE_ACTIONS, List.of(info)));
+        send(player, new WrapperPlayServerPlayerInfoUpdate(supported(UPDATE_ACTIONS), List.of(info)));
     }
 
     public void sendHeaderFooter(Player player, Component header, Component footer) {
@@ -127,10 +128,24 @@ public final class TabListPacketSender {
         );
     }
 
+    /**
+     * List order is 1.21.2+. PacketEvents leaves its value out below that, but Velocity reads
+     * one for the flag regardless, runs into the next entry and drops the connection.
+     */
+    private static EnumSet<WrapperPlayServerPlayerInfoUpdate.Action> supported(EnumSet<WrapperPlayServerPlayerInfoUpdate.Action> actions) {
+        if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_21_2)) {
+            return actions;
+        }
+        EnumSet<WrapperPlayServerPlayerInfoUpdate.Action> supported = EnumSet.copyOf(actions);
+        supported.remove(WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LIST_ORDER);
+        return supported;
+    }
+
+    /** Without list order the client sorts by this, so it has to run top to bottom too. */
     private static String nameFor(int index) {
         int column = index / TabLayout.ROWS;
         int row = index % TabLayout.ROWS;
-        return String.format("%c%02d", 'A' + column, TabLayout.ROWS - 1 - row);
+        return String.format("%c%02d", 'A' + column, row);
     }
 
     private void send(Player player, com.github.retrooper.packetevents.wrapper.PacketWrapper<?> packet) {

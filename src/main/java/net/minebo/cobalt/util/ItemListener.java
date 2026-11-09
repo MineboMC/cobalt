@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 
 public abstract class ItemListener implements Listener {
 
-    // we add a 500ms silent cooldown between all button uses
+    // Silent 500ms cooldown between button uses.
     protected static final Map<UUID, Long> canUseButton = new ConcurrentHashMap<>();
 
     private final Map<ItemStack, Consumer<Player>> handlers = new HashMap<>();

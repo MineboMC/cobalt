@@ -24,7 +24,6 @@ public class Button {
     public Supplier<Integer> amount;
     private HashMap<ClickType, List<Consumer<Player>>> clickActions;
 
-    // Special Cases
     public Supplier<PotionType> potionType;
     public Supplier<UUID> skullOwner;
 
@@ -36,7 +35,7 @@ public class Button {
         this.clickActions = new HashMap<>();
 
         this.potionType = () -> null;
-        this.skullOwner = () -> null;        // ← NEW
+        this.skullOwner = () -> null;
     }
 
     public Button setName(String name) {
@@ -117,7 +116,6 @@ public class Button {
         ItemStack item = new ItemStack(mat, (amount.get() > 0) ? amount.get() : 1);
         ItemMeta meta = item.getItemMeta();
 
-        // Potion support
         if (meta instanceof PotionMeta potionMeta) {
             PotionType type = this.potionType.get();
             if (type != null) {
@@ -125,7 +123,6 @@ public class Button {
             }
         }
 
-        // Skull support
         if (meta instanceof SkullMeta skullMeta && mat == Material.PLAYER_HEAD) {
             UUID owner = this.skullOwner.get();
             if (owner != null) {

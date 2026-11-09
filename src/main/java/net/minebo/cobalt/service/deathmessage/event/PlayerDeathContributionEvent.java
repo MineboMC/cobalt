@@ -9,7 +9,7 @@ import org.bukkit.event.HandlerList;
  * contribution breakdown. Other plugins can listen for this to grant assist
  * rewards, log kill statistics, etc. This event does not control the death
  * message itself — register a
- * {@code net.minebo.cobalt.service.death.DeathMessageProvider} for that.
+ * {@link net.minebo.cobalt.service.deathmessage.DeathMessageProvider} for that.
  */
 public final class PlayerDeathContributionEvent extends Event {
 

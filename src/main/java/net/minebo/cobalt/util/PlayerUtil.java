@@ -24,7 +24,7 @@ public class PlayerUtil {
         return player.getPing();
     }
 
-    // ported from qlib
+    // Ported from qLib.
     public static void animateDeath(Player player) {
         animateDeath(player, player.getTrackedBy());
     }
@@ -36,8 +36,8 @@ public class PlayerUtil {
     private static void animateDeath(Player player, Collection<? extends Player> watchers) {
         if (watchers.isEmpty()) return;
 
-        int entityId = SpigotReflectionUtil.generateEntityId(); // or your EntityUtils.getFakeEntityId()
-        UUID fakeUuid = UUID.randomUUID(); // must NOT be the real player's UUID (see notes)
+        int entityId = SpigotReflectionUtil.generateEntityId();
+        UUID fakeUuid = UUID.randomUUID(); // Reusing the real UUID would clash with the real player on the client.
 
         // Copy the real player's skin onto a throwaway profile
         List<TextureProperty> textures = new ArrayList<>();
@@ -69,7 +69,7 @@ public class PlayerUtil {
                 0,
                 Optional.empty());
 
-        // 3. Show all skin layers (index 17 on 1.21.x: displayed skin parts)
+        // 3. Show all skin layers (displayed skin parts are index 17 before 1.21.9)
         WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(
                 entityId,
                 List.of(new EntityData(17, EntityDataTypes.BYTE, (byte) 0x7F)));

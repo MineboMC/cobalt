@@ -119,7 +119,7 @@ public enum ParticleEffect {
     ITEM_COBWEB(Particle.ITEM_COBWEB),
     DUST_PILLAR(Particle.DUST_PILLAR, BlockData.class),
     BLOCK_CRUMBLE(Particle.BLOCK_CRUMBLE, BlockData.class),
-    TRAIL(Particle.TRAIL), // Trail requires special class (blockdata/traildata), only add if needed
+    TRAIL(Particle.TRAIL), // Takes Particle.Trail data, so spawn it with displayData.
     OMINOUS_SPAWNING(Particle.OMINOUS_SPAWNING),
     RAID_OMEN(Particle.RAID_OMEN),
     TRIAL_OMEN(Particle.TRIAL_OMEN),
@@ -160,7 +160,6 @@ public enum ParticleEffect {
         return NAME_MAP.get(name.toLowerCase());
     }
 
-    // Basic particle display
     public void display(Location location, int amount, double offsetX, double offsetY, double offsetZ, double speed, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, offsetX, offsetY, offsetZ, speed);
@@ -172,7 +171,7 @@ public enum ParticleEffect {
         }
     }
 
-    // Color support for REDSTONE, ENTITY_EFFECT, etc
+    // Only DUST and ENTITY_EFFECT take a color.
     public void displayColor(Location location, org.bukkit.Color color, int amount, Player...players) {
         for (Player player : players) {
             if (bukkitParticle == Particle.DUST) {
@@ -187,7 +186,6 @@ public enum ParticleEffect {
         }
     }
 
-    // Special block-support particles
     public void displayBlock(Location location, BlockData blockData, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, blockData);
@@ -198,7 +196,6 @@ public enum ParticleEffect {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, blockType.createBlockData());
         }
     }
-    // Item particles
     public void displayItem(Location location, ItemStack itemStack, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 0, itemStack);
@@ -210,28 +207,25 @@ public enum ParticleEffect {
         }
     }
 
-    // DustTransition support
     public void displayDustTransition(Location location, DustTransition transition, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(Particle.DUST_COLOR_TRANSITION, location, amount, 0, 0, 0, 1.0, transition);
         }
     }
 
-    // Vibration support
     public void displayVibration(Location location, org.bukkit.Vibration vibration, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(Particle.VIBRATION, location, amount, 0, 0, 0, 1.0, vibration);
         }
     }
 
-    // SCULK_CHARGE + SHRIEK support (float & int)
+    // For particles with other data, e.g. SCULK_CHARGE (Float), SHRIEK (Integer) or TRAIL.
     public void displayData(Location location, Object data, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, 0, 0, 0, 1.0, data);
         }
     }
 
-    // Directional particles
     public void displayDirectional(Location location, Vector direction, double speed, int amount, Player...players) {
         for (Player player : players) {
             player.spawnParticle(bukkitParticle, location, amount, direction.getX(), direction.getY(), direction.getZ(), speed);

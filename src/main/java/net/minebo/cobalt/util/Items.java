@@ -116,7 +116,7 @@ public class Items {
 
 
     public static ItemStack getItemFromId(String id) {
-        // Check if it's a known potion ID
+        // Potion IDs take priority over material names.
         PotionType potionType = getPotionTypeFromId(id);
         if (potionType != null) {
             boolean splash = id.endsWith("s");
@@ -133,7 +133,6 @@ public class Items {
             return potion;
         }
 
-        // Otherwise treat as material
         try {
             Material mat = Material.matchMaterial(id.toUpperCase());
             if (mat != null) {
@@ -141,7 +140,6 @@ public class Items {
             }
         } catch (IllegalArgumentException ignored) {}
 
-        // Unknown item
         return null;
     }
 
@@ -262,7 +260,7 @@ public class Items {
 
         for (String id : baseIds) {
             materialNames.add(id);
-            materialNames.add("SPLASH_" + id); // Add splash variant
+            materialNames.add("SPLASH_" + id);
         }
 
         return materialNames;

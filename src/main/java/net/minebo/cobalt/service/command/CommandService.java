@@ -9,15 +9,18 @@ import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.service.CService;
 import net.minebo.cobalt.service.command.defaults.command.HologramCommand;
 import net.minebo.cobalt.service.command.defaults.command.NpcCommand;
+import net.minebo.cobalt.service.command.defaults.command.ProjectileCommand;
 import net.minebo.cobalt.service.command.defaults.completion.ChatColorCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.completion.DyeColorCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.completion.EnchantCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.completion.MaterialCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.completion.PlayerCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.context.ChatColorContextResolver;
+import net.minebo.cobalt.service.command.defaults.context.CommandFlagsContextResolver;
 import net.minebo.cobalt.service.command.defaults.context.EnchantmentContextResolver;
 import net.minebo.cobalt.service.command.defaults.context.OnlinePlayerContextResolver;
 import net.minebo.cobalt.service.command.defaults.context.UUIDContextResolver;
+import net.minebo.cobalt.service.command.flag.CommandFlags;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.Plugin;
@@ -52,7 +55,7 @@ public class CommandService extends CService {
 
     public PaperCommandManager getManager(Plugin plugin) {
         return managers.computeIfAbsent(plugin, p -> {
-            PaperCommandManager manager = new PaperCommandManager(p); // owner comes from here
+            PaperCommandManager manager = new PaperCommandManager(p); // Commands register under p, so each plugin gets its own manager.
             manager.enableUnstableAPI("help");
             manager.setHelpFormatter(new CobaltHelpFormatter(manager));
             registerDefaults(manager);
@@ -65,6 +68,7 @@ public class CommandService extends CService {
         registerContext(manager, OnlinePlayer.class, new OnlinePlayerContextResolver());
         registerContext(manager, UUID.class, new UUIDContextResolver());
         registerContext(manager, Enchantment.class, new EnchantmentContextResolver());
+        registerContext(manager, CommandFlags.class, new CommandFlagsContextResolver());
 
         CommandCompletions<?> completions = manager.getCommandCompletions();
         completions.registerCompletion("chatcolors", new ChatColorCompletionHandler());
@@ -75,6 +79,7 @@ public class CommandService extends CService {
 
         HologramCommand.registerCompletions(manager);
         NpcCommand.registerCompletions(manager);
+        ProjectileCommand.registerCompletions(manager);
 
     }
 

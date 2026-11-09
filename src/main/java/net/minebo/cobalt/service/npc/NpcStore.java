@@ -113,8 +113,8 @@ public final class NpcStore {
                 npc.setSkinMode(NpcSkinMode.NONE);
             }
             npc.setLookAtPlayers(section.getBoolean("lookAtPlayers", false));
-            npc.setLookDistance(section.getDouble("lookDistance", 8.0D));
-            npc.setViewDistance(section.getDouble("viewDistance", 30.0D));
+            npc.setLookDistance(section.getDouble("lookDistance", 16.0D));
+            npc.setViewDistance(section.getDouble("viewDistance", 60.0D));
             npc.setSkinMode(NpcSkinMode.valueOf(section.getString("skinMode", "VIEWER").toUpperCase(Locale.ROOT)));
             npc.setSkin(new NpcSkin(
                     section.getString("skin.value", ""),

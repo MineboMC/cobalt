@@ -54,8 +54,8 @@ public class PotionBuilder {
     /**
      * Add a custom potion effect.
      * @param effect The PotionEffectType to add.
-     * @param level  The potion level (1 = amplifier 0).If <= 0, it will be treated as 1.
-     * @param timeSeconds Duration in seconds.Converted to ticks (seconds * 20).
+     * @param level  The potion level (1 = amplifier 0). Anything <= 0 is treated as 1.
+     * @param timeSeconds Duration in seconds.
      */
     public PotionBuilder addEffect(PotionEffectType effect, int level, int timeSeconds) {
         if (effect == null) return this;
@@ -65,7 +65,7 @@ public class PotionBuilder {
             itemMeta = itemStack.getItemMeta();
             if (itemMeta instanceof PotionMeta) potionMeta = (PotionMeta) itemMeta;
         }
-        if (potionMeta == null) return this; // can't add effect if meta is not potion meta for some reason
+        if (potionMeta == null) return this;
 
         int amplifier = Math.max(0, level - 1);
         int ticks = timeSeconds * 20;
@@ -75,7 +75,7 @@ public class PotionBuilder {
     }
 
     /**
-     * Set base PotionType (e.g.INSTANT_HEAL, NIGHT_VISION, etc.)
+     * Set base PotionType (e.g. HEALING, NIGHT_VISION).
      */
     public PotionBuilder setPotionColor(PotionType type) {
         if (type == null) return this;
@@ -90,7 +90,7 @@ public class PotionBuilder {
     }
 
     /**
-     * Set a custom color for the potion (optional).
+     * Set a custom color for the potion.
      */
     public PotionBuilder setColor(Color color) {
         if (color == null) return this;

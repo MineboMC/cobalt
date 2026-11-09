@@ -1,8 +1,12 @@
 package net.minebo.cobalt.service.npc;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minebo.cobalt.Cobalt;
+import org.bukkit.Bukkit;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -21,8 +25,43 @@ public final class NpcSkinFetcher {
         if (username == null || username.isBlank()) {
             return Optional.empty();
         }
+        String name = username.trim();
+        Optional<NpcSkin> skin = fromServerProfile(name);
+        if (skin.isPresent()) {
+            return skin;
+        }
+        // api.mojang.com rate-limits or blocks a lot of hosting IPs, so try the newer endpoint first.
+        skin = fromMojang("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + name, name);
+        if (skin.isPresent()) {
+            return skin;
+        }
+        return fromMojang("https://api.mojang.com/users/profiles/minecraft/" + name, name);
+    }
+
+    /**
+     * Paper's own lookup, which goes through the server's session service and profile cache.
+     */
+    private static Optional<NpcSkin> fromServerProfile(String name) {
         try {
-            JsonObject profile = get("https://api.mojang.com/users/profiles/minecraft/" + username.trim());
+            PlayerProfile profile = Bukkit.createProfile(name);
+            if (!profile.complete(true)) {
+                return Optional.empty();
+            }
+            for (ProfileProperty property : profile.getProperties()) {
+                if ("textures".equalsIgnoreCase(property.getName()) && property.isSigned()) {
+                    String source = profile.getName() == null ? name : profile.getName();
+                    return Optional.of(new NpcSkin(property.getValue(), property.getSignature(), source));
+                }
+            }
+        } catch (Exception exception) {
+            warn("Server profile lookup for " + name + " failed: " + exception);
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<NpcSkin> fromMojang(String lookupUrl, String username) {
+        try {
+            JsonObject profile = get(lookupUrl);
             if (profile == null || !profile.has("id")) {
                 return Optional.empty();
             }
@@ -42,7 +81,8 @@ public final class NpcSkinFetcher {
                 String signature = property.has("signature") ? property.get("signature").getAsString() : "";
                 return Optional.of(new NpcSkin(value, signature, name));
             }
-        } catch (Exception ignored) {
+        } catch (Exception exception) {
+            warn("Skin lookup via " + lookupUrl + " failed: " + exception);
         }
         return Optional.empty();
     }
@@ -57,7 +97,13 @@ public final class NpcSkinFetcher {
         connection.setConnectTimeout(4000);
         connection.setReadTimeout(4000);
         connection.setRequestProperty("User-Agent", "Cobalt-NPC");
-        if (connection.getResponseCode() != 200) {
+        int status = connection.getResponseCode();
+        if (status != 200) {
+            // 204/404 just mean there's no such player.
+            if (status != 204 && status != 404) {
+                warn("GET " + url + " returned " + status);
+            }
+            connection.disconnect();
             return null;
         }
         try (InputStreamReader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
@@ -65,5 +111,9 @@ public final class NpcSkinFetcher {
         } finally {
             connection.disconnect();
         }
+    }
+
+    private static void warn(String message) {
+        Cobalt.getInstance().getLogger().warning("[NPC] " + message);
     }
 }

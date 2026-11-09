@@ -9,6 +9,8 @@ import net.minebo.cobalt.service.menu.impl.button.BackButton;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 
+import java.util.List;
+
 public final class HologramLinesMenu extends Menu {
 
     private final HologramService service;
@@ -31,7 +33,7 @@ public final class HologramLinesMenu extends Menu {
         this.onEdited = onEdited;
         setTitle("<gold>Lines: " + hologram.id());
         setSize(27);
-        setAutoUpdate(true); // saves me time in the way that i dont need to spend more time on this -- kab
+        setAutoUpdate(true); // Keeps the line previews current after an edit.
         setUpdateAfterClick(true);
         build();
     }
@@ -41,10 +43,9 @@ public final class HologramLinesMenu extends Menu {
         int slot = 0;
         for (int i = 0; i < hologram.lines().size() && slot < 18; i++) {
             int index = i;
-            String text = hologram.lines().get(i);
             setButton(slot++, new Button()
                     .setName("<yellow>#" + index)
-                    .setLines("<white>" + text, "<gray>Left click to edit", "<gray>Right click to remove")
+                    .setLines(() -> List.of("<white>" + hologram.lines().get(index), "<gray>Left click to edit", "<gray>Right click to remove"))
                     .setMaterial(Material.NAME_TAG)
                     .addClickAction(ClickType.LEFT, player -> HologramLineConversation.editLine(
                             service, hologram, index, player, new HologramLinesMenu(service, hologram, back, onEdited), onEdited))

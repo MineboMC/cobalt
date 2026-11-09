@@ -13,6 +13,8 @@ import net.minebo.cobalt.service.menu.MenuService;
 import net.minebo.cobalt.service.nametag.NametagService;
 import net.minebo.cobalt.service.nametag.example.ExampleNametagProvider;
 import net.minebo.cobalt.service.npc.NpcService;
+import net.minebo.cobalt.service.projectile.ProjectileService;
+import net.minebo.cobalt.service.projectile.example.ExampleProjectiles;
 import net.minebo.cobalt.service.prompt.PromptService;
 import net.minebo.cobalt.service.scheduler.SchedulerService;
 import net.minebo.cobalt.service.scheduler.example.EnderpearlCooldown;
@@ -38,7 +40,7 @@ public class Cobalt extends JavaPlugin {
    }
 
    public void registerServices() {
-      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService());
+      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService(), new ProjectileService());
 
       if(this.getConfig().getBoolean("testing", false)) {
          CobaltAPI.getBossBarService().registerProvider(new ExampleBossBarProvider(), 0);
@@ -47,6 +49,7 @@ public class Cobalt extends JavaPlugin {
          CobaltAPI.getNametagService().registerProvider(new ExampleNametagProvider(), 0);
          CobaltAPI.getSchedulerService().register(new SaleTimer());
          CobaltAPI.getSchedulerService().register(new EnderpearlCooldown());
+         ExampleProjectiles.registerAll(CobaltAPI.getProjectileService());
          CobaltAPI.getSchedulerService().startGlobalTimer(CobaltAPI.getSchedulerService().getTimer("sale"), 1, TimeUnit.HOURS);
       }
    }

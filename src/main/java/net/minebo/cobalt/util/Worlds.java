@@ -12,13 +12,11 @@ public class Worlds {
 
     public static World loadWorld(JavaPlugin plugin, String worldName) {
 
-        // Check if already loaded
         World existing = Bukkit.getWorld(worldName);
         if (existing != null) {
             return existing;
         }
 
-        // Check if folder exists
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
         if (!worldFolder.exists()) {
             plugin.getLogger().warning("World folder '" + worldName + "' not found. Generating a new one.");
@@ -40,14 +38,12 @@ public class Worlds {
     public static CompletableFuture<World> loadWorldAsync(JavaPlugin plugin, String worldName) {
         CompletableFuture<World> future = new CompletableFuture<>();
 
-        // Check if already loaded
         World existing = Bukkit.getWorld(worldName);
         if (existing != null) {
             future.complete(existing);
             return future;
         }
 
-        // Check if folder exists
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
         if (!worldFolder.exists()) {
             plugin.getLogger().warning("World folder '" + worldName + "' not found. Generating a new one.");
@@ -56,12 +52,10 @@ public class Worlds {
             return future;
         }
 
-        // Run file I/O off the main thread
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            // Simulate any pre-loading checks or file operations here
             plugin.getLogger().info("Preparing to load world '" + worldName + "'...");
 
-            // Switch back to main thread for actual world creation
+            // Worlds can only be created on the main thread.
             Bukkit.getScheduler().runTask(plugin, () -> {
                 try {
                     World world = Bukkit.createWorld(new WorldCreator(worldName));

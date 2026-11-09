@@ -5,6 +5,7 @@ import net.minebo.cobalt.service.ServiceManager;
 import net.minebo.cobalt.service.bossbar.BossBarService;
 import net.minebo.cobalt.service.command.CommandService;
 import net.minebo.cobalt.service.deathmessage.DeathMessageService;
+import net.minebo.cobalt.service.projectile.ProjectileService;
 import net.minebo.cobalt.service.prompt.PromptService;
 import net.minebo.cobalt.service.hologram.HologramService;
 import net.minebo.cobalt.service.menu.MenuService;
@@ -69,6 +70,10 @@ public class CobaltAPI {
 
     public static DeathMessageService getDeathMessageService() {
         return getServices().stream().filter(s -> s instanceof DeathMessageService).map(s -> (DeathMessageService) s).findFirst().orElse(null);
+    }
+
+    public static ProjectileService getProjectileService() {
+        return getServices().stream().filter(s -> s instanceof ProjectileService).map(s -> (ProjectileService) s).findFirst().orElse(null);
     }
 
 }

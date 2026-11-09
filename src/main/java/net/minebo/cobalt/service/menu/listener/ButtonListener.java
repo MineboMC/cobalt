@@ -34,7 +34,6 @@ public class ButtonListener implements Listener {
         }
 
         if (!menu.buttonSuppliers.containsKey(slot)) {
-            // No button in this slot
             if (!menu.nonCancelling) {
                 event.setCancelled(true);
             }
@@ -51,14 +50,11 @@ public class ButtonListener implements Listener {
 
         ClickType clickType = event.getClick();
 
-        // Check if the button wants to cancel this click event
         boolean shouldCancel = button.shouldCancel(player, clickType);
         event.setCancelled(shouldCancel);
 
-        // Execute the button's click action
         button.onClick(clickType, player);
 
-        // Update menu if configured to do so
         if (menu.updateAfterClick) {
             MenuService.updateMenu(player, menu);
         }

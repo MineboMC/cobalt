@@ -66,17 +66,16 @@ public class MenuService extends CService {
         Inventory topInv = player.getOpenInventory().getTopInventory();
         if (!inv.equals(topInv)) return;
 
-        // Critical: rebuild dynamic buttons each update tick (Basalt-like behavior)
+        // Dynamic menus repopulate their buttons on every update.
         menu.rebuild(player);
 
         int invSize = inv.getSize();
 
-        // hard clear to avoid stale items
+        // Clear first so slots the rebuild dropped don't keep their old item.
         for (int i = 0; i < invSize; i++) {
             inv.setItem(i, null);
         }
 
-        // re-render current button suppliers
         for (Map.Entry<Integer, Supplier<Button>> entry : menu.buttonSuppliers.entrySet()) {
             int slot = entry.getKey();
             if (slot < 0 || slot >= invSize) continue;

@@ -73,9 +73,8 @@ public class Menu {
         return this;
     }
 
-    // Basalt-like hook: dynamic menus override this and repopulate buttons each update tick
+    // Dynamic menus override this to repopulate their buttons on every update.
     public void rebuild(Player player) {
-        // default no-op for static menus
     }
 
     public void refresh(Player player) {

@@ -1,8 +1,10 @@
 package net.minebo.cobalt.service.nametag;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.service.CService;
 import net.minebo.cobalt.service.nametag.listener.NametagListener;
+import net.minebo.cobalt.service.nametag.packet.NametagPacketListener;
 import net.minebo.cobalt.service.nametag.packet.NametagPacketSender;
 import net.minebo.cobalt.service.nametag.registry.NametagProviderRegistry;
 import net.minebo.cobalt.service.nametag.state.NametagTracker;
@@ -23,6 +25,7 @@ public final class NametagService extends CService {
     private NametagTracker tracker;
     private NametagPacketSender packets;
     private NametagListener bukkitListener;
+    private NametagPacketListener packetListener;
     private BukkitTask task;
 
     @Override
@@ -36,8 +39,10 @@ public final class NametagService extends CService {
         tracker = new NametagTracker();
         packets = new NametagPacketSender();
         bukkitListener = new NametagListener(this);
+        packetListener = new NametagPacketListener(this, packets);
 
         Bukkit.getPluginManager().registerEvents(bukkitListener, Cobalt.getInstance());
+        PacketEvents.getAPI().getEventManager().registerListener(packetListener);
         startTask();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -52,6 +57,7 @@ public final class NametagService extends CService {
             task = null;
         }
         HandlerList.unregisterAll(bukkitListener);
+        PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             clear(viewer);
         }
@@ -135,8 +141,23 @@ public final class NametagService extends CService {
             return;
         }
         if (!previous.equals(next)) {
-            packets.update(viewer, target, next);
+            packets.update(viewer, target, previous, next);
             state.put(target.getUniqueId(), next);
+        }
+    }
+
+    /**
+     * Respawns the target's extra lines for the viewer, after the server spawned the target for them.
+     */
+    public void showLines(Player viewer, UUID targetId) {
+        Player target = Bukkit.getPlayer(targetId);
+        if (target == null || !viewer.isOnline()) {
+            return;
+        }
+        ViewerNametagState state = tracker.get(viewer).orElse(null);
+        Nametag nametag = state == null ? null : state.get(targetId);
+        if (nametag != null) {
+            packets.showLines(viewer, target, nametag);
         }
     }
 
@@ -156,10 +177,12 @@ public final class NametagService extends CService {
     public void handleQuit(Player player) {
         clear(player);
         tracker.remove(player);
+        packets.forgetViewer(player.getUniqueId());
         UUID left = player.getUniqueId();
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             removePair(viewer, left);
         }
+        packets.forgetTarget(player);
     }
 
     private void removePair(Player viewer, UUID targetId) {

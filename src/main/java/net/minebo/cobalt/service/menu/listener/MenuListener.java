@@ -15,7 +15,6 @@ public class MenuListener implements Listener {
         Player player = (Player) event.getPlayer();
         String playerName = player.getName();
 
-        // Check if the player had one of our menus open
         if (MenuService.currentlyOpenedMenus.containsKey(playerName)) {
             MenuService.getPlayerMenu(playerName).closeMenu(player);
         }

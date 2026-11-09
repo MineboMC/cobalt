@@ -23,7 +23,6 @@ public class ConfirmMenu extends Menu {
                 .setTitle("<green>Confirm: " + title)
                 .setSize(27);
 
-        // Confirm button (green wool) at slot 11
         Button confirmButton = new Button()
                 .setMaterial(Material.GREEN_WOOL)
                 .setAmount(1)
@@ -42,7 +41,6 @@ public class ConfirmMenu extends Menu {
 
         menu.setButton(11, confirmButton);
 
-        // Cancel button (red wool) at slot 15
         Button cancelButton = new Button()
                 .setMaterial(Material.RED_WOOL)
                 .setAmount(1)
@@ -61,7 +59,6 @@ public class ConfirmMenu extends Menu {
 
         menu.setButton(15, cancelButton);
 
-        // Fill empty slots with gray glass pane
         menu.fillEmpty(Material.GRAY_STAINED_GLASS_PANE, true);
 
         menu.openMenu(player);

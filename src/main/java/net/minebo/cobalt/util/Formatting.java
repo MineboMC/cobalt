@@ -5,7 +5,7 @@ import java.util.Locale;
 
 public class Formatting {
 
-    //Strings
+    // Strings
     public static String fixCapitalization(String input) {
         if (input == null || input.isEmpty()) return input;
 
@@ -23,7 +23,7 @@ public class Formatting {
         return capitalized.toString().trim();
     }
 
-    //Numbers
+    // Numbers
     public static String addCommas(int number) {
         return NumberFormat.getNumberInstance(Locale.US).format(number);
     }

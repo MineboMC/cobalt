@@ -16,6 +16,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
+import java.util.List;
+
 public final class NpcEditorMenu extends Menu {
 
     private final NpcService service;
@@ -56,9 +58,7 @@ public final class NpcEditorMenu extends Menu {
 
         setButton(11, new Button()
                 .setName("<gold>Hologram lines")
-                .setLines(
-                        npc.hologramLines().isEmpty() ? "<gray>empty" : "<white>" + npc.hologramLines().get(0)
-                )
+                .setLines(() -> List.of( npc.hologramLines().isEmpty() ? "<gray>empty" : "<white>" + npc.hologramLines().getFirst()))
                 .setMaterial(Material.NAME_TAG)
                 .addClickAction(ClickType.LEFT, player -> {
                     Hologram hologram = service.ensureNameHologram(npc);
@@ -97,13 +97,14 @@ public final class NpcEditorMenu extends Menu {
 
         setButton(16, new Button()
                 .setName(npc.lookAtPlayers() ? "<green>Look at players" : "<red>Look at players")
-                .setLines("<white>" + npc.lookDistance() + " blocks")
+                .setLines("<white>" + npc.lookDistance() + " blocks", "<aqua>Left Click to toggle", "<yellow>Right Click to set the distance")
                 .setMaterial(npc.lookAtPlayers() ? Material.ENDER_EYE : Material.ENDER_PEARL)
                 .addClickAction(ClickType.LEFT, player -> {
                     npc.setLookAtPlayers(!npc.lookAtPlayers());
                     service.save(npc);
                     new NpcEditorMenu(service, npc).openMenu(player);
-                }));
+                })
+                .addClickAction(ClickType.RIGHT, this::promptLookDistance));
 
         setButton(22, new Button()
                 .setName("<red>Delete")
@@ -118,6 +119,36 @@ public final class NpcEditorMenu extends Menu {
                 }).openMenu(player)));
 
         fillEmpty(Material.GRAY_STAINED_GLASS_PANE, true);
+    }
+
+    private void promptLookDistance(Player player) {
+        player.closeInventory();
+
+        CobaltAPI.getPromptService().ask(player,
+                "<yellow>Type how many blocks away the NPC should look at players from, or <red>cancel</red> to go back.",
+                input -> applyLookDistance(player, input),
+                () -> new NpcEditorMenu(service, npc).openMenu(player));
+    }
+
+    private void applyLookDistance(Player editor, String input) {
+        double distance;
+        try {
+            distance = Double.parseDouble(input);
+        } catch (NumberFormatException exception) {
+            editor.sendMessage(Component.text("'" + input + "' isn't a number.", NamedTextColor.RED));
+            new NpcEditorMenu(service, npc).openMenu(editor);
+            return;
+        }
+        if (!Double.isFinite(distance) || distance < 1.0D) {
+            editor.sendMessage(Component.text("The distance has to be at least 1 block.", NamedTextColor.RED));
+            new NpcEditorMenu(service, npc).openMenu(editor);
+            return;
+        }
+
+        npc.setLookDistance(distance);
+        service.save(npc);
+        editor.sendMessage(Component.text(npc.name() + " now looks at players within " + npc.lookDistance() + " blocks.", NamedTextColor.GREEN));
+        new NpcEditorMenu(service, npc).openMenu(editor);
     }
 
     private void promptSkinName(Player player) {
