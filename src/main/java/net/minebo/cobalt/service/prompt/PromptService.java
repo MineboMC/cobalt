@@ -30,7 +30,7 @@ public class PromptService extends CService implements Listener {
 
     @Override
     public String getName() {
-        return "Prompt Service";
+        return "Prompts";
     }
 
     @Override
