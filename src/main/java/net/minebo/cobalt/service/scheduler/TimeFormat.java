@@ -41,4 +41,31 @@ public final class TimeFormat {
         }
         return tenths(safe);
     }
+
+    /** 1 hour 5 minutes, 30 seconds, ... (zero parts are skipped) */
+    public static String words(long millis) {
+        long total = (Math.max(0L, millis) + 999L) / 1000L;
+        long hours = total / 3600L;
+        long minutes = (total % 3600L) / 60L;
+        long seconds = total % 60L;
+
+        StringBuilder builder = new StringBuilder();
+        appendUnit(builder, hours, "hour");
+        appendUnit(builder, minutes, "minute");
+        appendUnit(builder, seconds, "second");
+        return builder.length() == 0 ? "0 seconds" : builder.toString();
+    }
+
+    private static void appendUnit(StringBuilder builder, long amount, String unit) {
+        if (amount <= 0L) {
+            return;
+        }
+        if (builder.length() > 0) {
+            builder.append(' ');
+        }
+        builder.append(amount).append(' ').append(unit);
+        if (amount != 1L) {
+            builder.append('s');
+        }
+    }
 }

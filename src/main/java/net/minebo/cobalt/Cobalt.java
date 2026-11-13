@@ -4,8 +4,12 @@ import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import lombok.Getter;
 import net.minebo.cobalt.service.ServiceManager;
+import net.minebo.cobalt.service.actionbar.ActionBarService;
+import net.minebo.cobalt.service.actionbar.example.ExampleActionBarListener;
+import net.minebo.cobalt.service.actionbar.example.ExampleActionBarProvider;
 import net.minebo.cobalt.service.bossbar.BossBarService;
 import net.minebo.cobalt.service.bossbar.example.ExampleBossBarProvider;
+import net.minebo.cobalt.service.chat.ChatService;
 import net.minebo.cobalt.service.command.CommandService;
 import net.minebo.cobalt.service.deathmessage.DeathMessageService;
 import net.minebo.cobalt.service.hologram.HologramService;
@@ -16,6 +20,7 @@ import net.minebo.cobalt.service.npc.NpcService;
 import net.minebo.cobalt.service.projectile.ProjectileService;
 import net.minebo.cobalt.service.projectile.example.ExampleProjectiles;
 import net.minebo.cobalt.service.prompt.PromptService;
+import net.minebo.cobalt.service.reboot.RebootService;
 import net.minebo.cobalt.service.scheduler.SchedulerService;
 import net.minebo.cobalt.service.scheduler.example.EnderpearlCooldown;
 import net.minebo.cobalt.service.scheduler.example.SaleTimer;
@@ -24,6 +29,9 @@ import net.minebo.cobalt.service.scoreboard.example.ExampleScoreboardProvider;
 import net.minebo.cobalt.service.store.StoreService;
 import net.minebo.cobalt.service.tablist.TabListService;
 import net.minebo.cobalt.service.tablist.example.ExampleTabListProvider;
+import net.minebo.cobalt.service.visibility.VisibilityService;
+import net.minebo.cobalt.service.visibility.example.ExampleVisibilityProvider;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.TimeUnit;
@@ -40,13 +48,16 @@ public class Cobalt extends JavaPlugin {
    }
 
    public void registerServices() {
-      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService(), new ProjectileService());
+      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService(), new ProjectileService(), new ActionBarService(), new VisibilityService(), new ChatService(), new RebootService());
 
       if(this.getConfig().getBoolean("testing", false)) {
          CobaltAPI.getBossBarService().registerProvider(new ExampleBossBarProvider(), 0);
          CobaltAPI.getTabListService().registerProvider(new ExampleTabListProvider(), 0);
          CobaltAPI.getScoreboardService().registerProvider(new ExampleScoreboardProvider(), 0);
          CobaltAPI.getNametagService().registerProvider(new ExampleNametagProvider(), 0);
+         CobaltAPI.getActionBarService().registerProvider(new ExampleActionBarProvider(), 0);
+         CobaltAPI.getVisibilityService().registerProvider(new ExampleVisibilityProvider(), 0);
+         Bukkit.getPluginManager().registerEvents(new ExampleActionBarListener(CobaltAPI.getActionBarService()), this);
          CobaltAPI.getSchedulerService().register(new SaleTimer());
          CobaltAPI.getSchedulerService().register(new EnderpearlCooldown());
          ExampleProjectiles.registerAll(CobaltAPI.getProjectileService());

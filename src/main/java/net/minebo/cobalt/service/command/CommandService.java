@@ -7,6 +7,7 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import co.aikar.commands.contexts.ContextResolver;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.service.CService;
+import net.minebo.cobalt.service.command.defaults.command.ChannelCommand;
 import net.minebo.cobalt.service.command.defaults.command.HologramCommand;
 import net.minebo.cobalt.service.command.defaults.command.NpcCommand;
 import net.minebo.cobalt.service.command.defaults.command.ProjectileCommand;
@@ -80,6 +81,7 @@ public class CommandService extends CService {
         HologramCommand.registerCompletions(manager);
         NpcCommand.registerCompletions(manager);
         ProjectileCommand.registerCompletions(manager);
+        ChannelCommand.registerCompletions(manager);
 
     }
 

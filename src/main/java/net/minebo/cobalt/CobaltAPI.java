@@ -2,11 +2,14 @@ package net.minebo.cobalt;
 
 import net.minebo.cobalt.service.CService;
 import net.minebo.cobalt.service.ServiceManager;
+import net.minebo.cobalt.service.actionbar.ActionBarService;
 import net.minebo.cobalt.service.bossbar.BossBarService;
+import net.minebo.cobalt.service.chat.ChatService;
 import net.minebo.cobalt.service.command.CommandService;
 import net.minebo.cobalt.service.deathmessage.DeathMessageService;
 import net.minebo.cobalt.service.projectile.ProjectileService;
 import net.minebo.cobalt.service.prompt.PromptService;
+import net.minebo.cobalt.service.reboot.RebootService;
 import net.minebo.cobalt.service.hologram.HologramService;
 import net.minebo.cobalt.service.menu.MenuService;
 import net.minebo.cobalt.service.nametag.NametagService;
@@ -15,6 +18,7 @@ import net.minebo.cobalt.service.scheduler.SchedulerService;
 import net.minebo.cobalt.service.scoreboard.ScoreboardService;
 import net.minebo.cobalt.service.store.StoreService;
 import net.minebo.cobalt.service.tablist.TabListService;
+import net.minebo.cobalt.service.visibility.VisibilityService;
 
 import java.util.List;
 
@@ -74,6 +78,22 @@ public class CobaltAPI {
 
     public static ProjectileService getProjectileService() {
         return getServices().stream().filter(s -> s instanceof ProjectileService).map(s -> (ProjectileService) s).findFirst().orElse(null);
+    }
+
+    public static ActionBarService getActionBarService() {
+        return getServices().stream().filter(s -> s instanceof ActionBarService).map(s -> (ActionBarService) s).findFirst().orElse(null);
+    }
+
+    public static VisibilityService getVisibilityService() {
+        return getServices().stream().filter(s -> s instanceof VisibilityService).map(s -> (VisibilityService) s).findFirst().orElse(null);
+    }
+
+    public static ChatService getChatService() {
+        return getServices().stream().filter(s -> s instanceof ChatService).map(s -> (ChatService) s).findFirst().orElse(null);
+    }
+
+    public static RebootService getRebootService() {
+        return getServices().stream().filter(s -> s instanceof RebootService).map(s -> (RebootService) s).findFirst().orElse(null);
     }
 
 }
