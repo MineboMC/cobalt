@@ -2,28 +2,14 @@ testing: false
 
 reboot:
   enabled: false
-  # Blank uses the server's timezone. Examples: America/New_York, Europe/London
   timezone: ""
-  # 24-hour HH:mm times the server reboots at every day.
   times:
     - "04:00"
     - "16:00"
-  # Seconds before the reboot to broadcast a warning.
   warnings: [1800, 900, 600, 300, 120, 60, 30, 15, 10, 5, 4, 3, 2, 1]
-  # <time> is replaced with e.g. "5 minutes".
-  warning-message: "&c&lREBOOT! &fThe server will reboot in &c<time>&f."
-  kick-message: "&cThe server is rebooting. Please reconnect shortly."
-  # true uses spigot.yml's restart-script, false just stops the server (for hosts that auto-restart).
+  warning-message:
+    - "&c&lREBOOT! &fThe server will reboot in &c<time>&f."
+  kick-message:
+    - "&cThe server is rebooting."
+    - "&7Please reconnect shortly."
   use-restart-script: false
-
-chat:
-  enabled: true
-  default-channel: global
-  channels:
-    global:
-      # <player> is the display name, <message> the message. PlaceholderAPI placeholders work too.
-      format: "<player><gray>: <white><message>"
-      # Start a message with this to send it to global once while in another channel. Blank for none.
-      prefix: "!"
-      # Blank for none.
-      permission: ""

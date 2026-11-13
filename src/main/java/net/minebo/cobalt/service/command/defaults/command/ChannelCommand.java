@@ -15,10 +15,12 @@ import net.minebo.cobalt.service.chat.ChatService;
 import net.minebo.cobalt.util.Coloring;
 import org.bukkit.entity.Player;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CommandAlias("channel|ch|chat")
-@Description("Switch the chat channel you talk in.")
+@Description("Switch the chat channel you talk in, or send one message in it.")
 public final class ChannelCommand extends BaseCommand {
 
     public static void registerCompletions(BukkitCommandManager manager) {
@@ -37,31 +39,32 @@ public final class ChannelCommand extends BaseCommand {
     }
 
     @Default
-    @Syntax("[channel]")
+    @Syntax("[channel] [message]")
     @CommandCompletion("@chatchannels")
-    public void onChannel(Player player, @Optional String id) {
+    public void onChannel(Player player, @Optional String name, @Optional String message) {
         ChatService service = CobaltAPI.getChatService();
         if (service == null || !service.isEnabled()) {
             player.sendMessage(Coloring.toComponent("<red>Chat channels are disabled."));
             return;
         }
 
-        if (id == null) {
-            player.sendMessage(Coloring.toComponent("<gray>You are talking in <aqua>" + service.getChannel(player).getDisplayName() + "<gray>."));
+        if (name == null) {
+            ChatChannel current = service.getChannel(player);
+            String available = service.getChannels().stream()
+                    .filter(channel -> channel.canSpeak(player))
+                    .sorted(Comparator.comparing(ChatChannel::getId))
+                    .map(channel -> (channel == current ? "<white>> " : "") + channel.getDisplayName())
+                    .collect(Collectors.joining("<gray>, "));
+            player.sendMessage(Coloring.toComponent("<gray>You are talking in <reset>" + current.getDisplayName() + "<gray>."));
+            player.sendMessage(Coloring.toComponent("<gray>Channels: " + available));
             return;
         }
 
-        ChatChannel channel = service.getChannel(id);
+        ChatChannel channel = service.getChannel(name);
         if (channel == null) {
-            player.sendMessage(Coloring.toComponent("<red>Unknown channel: " + id));
+            player.sendMessage(Coloring.toComponent("<red>Unknown channel: " + name));
             return;
         }
-        if (!channel.canSpeak(player)) {
-            player.sendMessage(Coloring.toComponent("<red>You can't speak in " + channel.getDisplayName() + " chat."));
-            return;
-        }
-
-        service.setChannel(player, channel);
-        player.sendMessage(Coloring.toComponent("<gray>You are now talking in <aqua>" + channel.getDisplayName() + "<gray>."));
+        service.toggleOrSend(player, channel, message);
     }
 }

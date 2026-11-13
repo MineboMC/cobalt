@@ -28,8 +28,8 @@ public final class RebootService extends CService {
     private ZoneId zone;
     private final List<LocalTime> times = new ArrayList<>();
     private final List<Integer> warnings = new ArrayList<>();
-    private String warningMessage;
-    private String kickMessage;
+    private List<String> warningMessage;
+    private List<String> kickMessage;
     private boolean useRestartScript;
 
     /** Manually scheduled reboot, overrides the configured times while set. */
@@ -90,15 +90,20 @@ public final class RebootService extends CService {
         List<Integer> configured = config == null ? List.of() : config.getIntegerList("warnings");
         warnings.addAll(configured.isEmpty() ? DEFAULT_WARNINGS : configured);
 
-        warningMessage = config == null ? null : config.getString("warning-message");
-        if (warningMessage == null) {
-            warningMessage = "&c&lREBOOT &7» &fThe server will reboot in &c<time>&f.";
-        }
-        kickMessage = config == null ? null : config.getString("kick-message");
-        if (kickMessage == null) {
-            kickMessage = "&cThe server is rebooting. Please reconnect shortly.";
-        }
+        warningMessage = getLines(config, "warning-message", "&c&lREBOOT &7» &fThe server will reboot in &c<time>&f.");
+        kickMessage = getLines(config, "kick-message", "&cThe server is rebooting. Please reconnect shortly.");
         useRestartScript = config != null && config.getBoolean("use-restart-script", false);
+    }
+
+    /** A list of lines, or a single string as one line for older configs. */
+    private static List<String> getLines(ConfigurationSection config, String path, String fallback) {
+        if (config == null || !config.contains(path)) {
+            return List.of(fallback);
+        }
+        if (config.isList(path)) {
+            return config.getStringList(path);
+        }
+        return List.of(config.getString(path, fallback));
     }
 
     /** Epoch millis of the next reboot, or -1 if none is scheduled. */
@@ -184,7 +189,10 @@ public final class RebootService extends CService {
             }
         }
         if (announce) {
-            Bukkit.broadcast(Coloring.toComponent(warningMessage.replace("<time>", TimeFormat.words(secondsLeft * 1000L))));
+            String time = TimeFormat.words(secondsLeft * 1000L);
+            for (String line : warningMessage) {
+                Bukkit.broadcast(Coloring.toComponent(line.replace("<time>", time)));
+            }
         }
     }
 
@@ -192,7 +200,7 @@ public final class RebootService extends CService {
     public void reboot() {
         rebooting = true;
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.kick(Coloring.toComponent(kickMessage));
+            player.kick(Coloring.toComponent(String.join("\n", kickMessage)));
         }
         if (useRestartScript) {
             Bukkit.spigot().restart();

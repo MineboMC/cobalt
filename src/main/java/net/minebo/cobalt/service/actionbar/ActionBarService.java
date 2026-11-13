@@ -57,6 +57,10 @@ public final class ActionBarService extends CService {
         tracker.clear();
     }
 
+    /**
+     * Providers are asked from highest weight to lowest; the first one that returns text is shown,
+     * so a provider that only applies to some players should return null for the rest.
+     */
     public void registerProvider(ActionBarProvider provider, int weight) {
         registry.register(provider, weight);
         refreshAll();
@@ -147,16 +151,20 @@ public final class ActionBarService extends CService {
         tracker.remove(player);
     }
 
+    /** The first provider, highest weight first, with something to show this player. */
     private Component providerText(Player player) {
-        ActionBarProvider provider = registry.select();
-        if (provider == null) {
-            return null;
+        for (ActionBarProvider provider : registry.all()) {
+            Component text;
+            try {
+                text = provider.getText(player);
+            } catch (Exception exception) {
+                continue;
+            }
+            if (text != null && !text.equals(Component.empty())) {
+                return text;
+            }
         }
-        try {
-            return provider.getText(player);
-        } catch (Exception exception) {
-            return null;
-        }
+        return null;
     }
 
     private void startTask() {
