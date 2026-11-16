@@ -14,7 +14,7 @@ import net.minebo.cobalt.service.chat.channel.GlobalChatChannel;
 import net.minebo.cobalt.util.Coloring;
 import org.bukkit.entity.Player;
 
-@CommandAlias("global|g")
+@CommandAlias("global")
 @Description("Switch to global chat, or send one message in it.")
 public final class GlobalCommand extends BaseCommand {
 
