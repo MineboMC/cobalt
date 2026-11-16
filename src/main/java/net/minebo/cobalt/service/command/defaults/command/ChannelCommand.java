@@ -19,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@CommandAlias("channel|ch|chat")
+@CommandAlias("channel|ch")
 @Description("Switch the chat channel you talk in, or send one message in it.")
 public final class ChannelCommand extends BaseCommand {
 
