@@ -38,39 +38,40 @@ import java.util.concurrent.TimeUnit;
 
 public class Cobalt extends JavaPlugin {
 
-   @Getter public static Cobalt instance;
+    @Getter
+    public static Cobalt instance;
 
-   public void onEnable() {
-      instance = this;
-      this.saveDefaultConfig();
-      loadPacketEvents();
-      registerServices();
-   }
+    public void onEnable() {
+        instance = this;
+        this.saveDefaultConfig();
+        loadPacketEvents();
+        registerServices();
+    }
 
-   public void registerServices() {
-      ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService(), new ProjectileService(), new ActionBarService(), new VisibilityService(), new ChatService(), new RebootService());
+    public void registerServices() {
+        ServiceManager.register(this, new StoreService(), new CommandService(), new MenuService(), new PromptService(), new BossBarService(), new TabListService(), new ScoreboardService(), new NametagService(), new SchedulerService(), new HologramService(), new NpcService(), new DeathMessageService(), new ProjectileService(), new ActionBarService(), new VisibilityService(), new ChatService(), new RebootService());
 
-      if(this.getConfig().getBoolean("testing", false)) {
-         CobaltAPI.getBossBarService().registerProvider(new ExampleBossBarProvider(), 0);
-         CobaltAPI.getTabListService().registerProvider(new ExampleTabListProvider(), 0);
-         CobaltAPI.getScoreboardService().registerProvider(new ExampleScoreboardProvider(), 0);
-         CobaltAPI.getNametagService().registerProvider(new ExampleNametagProvider(), 0);
-         CobaltAPI.getActionBarService().registerProvider(new ExampleActionBarProvider(), 0);
-         CobaltAPI.getVisibilityService().registerProvider(new ExampleVisibilityProvider(), 0);
-         Bukkit.getPluginManager().registerEvents(new ExampleActionBarListener(CobaltAPI.getActionBarService()), this);
-         CobaltAPI.getSchedulerService().register(new SaleTimer());
-         CobaltAPI.getSchedulerService().register(new EnderpearlCooldown());
-         ExampleProjectiles.registerAll(CobaltAPI.getProjectileService());
-         CobaltAPI.getSchedulerService().startGlobalTimer(CobaltAPI.getSchedulerService().getTimer("sale"), 1, TimeUnit.HOURS);
-      }
-   }
+        if (this.getConfig().getBoolean("testing", false)) {
+            CobaltAPI.getBossBarService().registerProvider(new ExampleBossBarProvider(), 0);
+            CobaltAPI.getTabListService().registerProvider(new ExampleTabListProvider(), 0);
+            CobaltAPI.getScoreboardService().registerProvider(new ExampleScoreboardProvider(), 0);
+            CobaltAPI.getNametagService().registerProvider(new ExampleNametagProvider(), 0);
+            CobaltAPI.getActionBarService().registerProvider(new ExampleActionBarProvider(), 0);
+            CobaltAPI.getVisibilityService().registerProvider(new ExampleVisibilityProvider(), 0);
+            Bukkit.getPluginManager().registerEvents(new ExampleActionBarListener(CobaltAPI.getActionBarService()), this);
+            CobaltAPI.getSchedulerService().register(new SaleTimer());
+            CobaltAPI.getSchedulerService().register(new EnderpearlCooldown());
+            ExampleProjectiles.registerAll(CobaltAPI.getProjectileService());
+            CobaltAPI.getSchedulerService().startGlobalTimer(CobaltAPI.getSchedulerService().getTimer("sale"), 1, TimeUnit.HOURS);
+        }
+    }
 
-   public void loadPacketEvents() {
-      if (PacketEvents.getAPI() == null) {
-         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-         PacketEvents.getAPI().load();
-         PacketEvents.getAPI().init();
-      }
-   }
+    public void loadPacketEvents() {
+        if (PacketEvents.getAPI() == null) {
+            PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+            PacketEvents.getAPI().load();
+            PacketEvents.getAPI().init();
+        }
+    }
 
 }

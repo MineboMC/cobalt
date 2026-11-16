@@ -7,9 +7,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -20,6 +22,7 @@ public class Menu {
     public boolean autoUpdate = false;
     public boolean updateAfterClick = true;
     public boolean nonCancelling = false;
+    private InventoryType type = InventoryType.CHEST;
     private GameMode originalMode;
 
     public Menu() {
@@ -33,8 +36,26 @@ public class Menu {
     }
 
     public Menu setSize(Integer size) {
-        this.size = size;
+        this.size = type == InventoryType.CHEST ? size : type.getDefaultSize();
         return this;
+    }
+
+    public InventoryType getType() {
+        return type;
+    }
+
+    public Menu setType(InventoryType type) {
+        Objects.requireNonNull(type, "Inventory type cannot be null");
+        if (!type.isCreatable()) {
+            throw new IllegalArgumentException("Cannot create a menu of type " + type);
+        }
+        this.type = type;
+        this.size = type.getDefaultSize();
+        return this;
+    }
+
+    public int getSize() {
+        return type == InventoryType.CHEST ? normalizeChestSize(size) : type.getDefaultSize();
     }
 
     public Menu setButton(Integer slot, Button button) {
@@ -43,7 +64,7 @@ public class Menu {
     }
 
     public Menu fillEmpty(Material material, Boolean hideName) {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < getSize(); i++) {
             if (!buttonSuppliers.containsKey(i)) {
                 buttonSuppliers.put(i, () -> (hideName)
                         ? new Button().setMaterial(material).setName(" ")
@@ -82,16 +103,21 @@ public class Menu {
     }
 
     public int getSlot(int x, int y) {
-        return y * 9 + x;
+        int width = switch (type) {
+            case DISPENSER, DROPPER, CRAFTER -> 3;
+            case HOPPER -> 5;
+            default -> 9;
+        };
+        return y * width + x;
     }
 
     public void openMenu(Player player) {
-        int safeSize = normalizeChestSize(size);
-        this.size = safeSize;
+        Inventory inv = type == InventoryType.CHEST
+                ? Bukkit.createInventory(null, getSize(), title)
+                : Bukkit.createInventory(null, type, title);
+        this.size = inv.getSize();
 
-        Inventory inv = Bukkit.createInventory(null, safeSize, title);
-
-        for (int i = 0; i < safeSize; i++) {
+        for (int i = 0; i < inv.getSize(); i++) {
             Supplier<Button> supplier = buttonSuppliers.get(i);
             if (supplier != null) {
                 inv.setItem(i, supplier.get().build());
