@@ -1,15 +1,11 @@
 testing: false
 
+# Reboots are enabled when at least one time is listed.
 reboot:
-  enabled: false
   timezone: ""
   times:
     - "04:00"
     - "16:00"
-  warnings: [1800, 900, 600, 300, 120, 60, 30, 15, 10, 5, 4, 3, 2, 1]
-  warning-message:
-    - "&c&lREBOOT! &fThe server will reboot in &c<time>&f."
   kick-message:
     - "&cThe server is rebooting."
     - "&7Please reconnect shortly."
-  use-restart-script: false

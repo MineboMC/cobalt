@@ -1,7 +1,10 @@
 package net.minebo.cobalt.service.reboot;
 
 import net.minebo.cobalt.Cobalt;
+import net.minebo.cobalt.CobaltAPI;
 import net.minebo.cobalt.service.CService;
+import net.minebo.cobalt.service.bossbar.BossBarService;
+import net.minebo.cobalt.service.reboot.provider.RebootBossBarProvider;
 import net.minebo.cobalt.service.reboot.task.RebootTask;
 import net.minebo.cobalt.service.scheduler.TimeFormat;
 import net.minebo.cobalt.util.Coloring;
@@ -10,6 +13,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -22,24 +26,29 @@ import java.util.concurrent.TimeUnit;
 
 public final class RebootService extends CService {
 
-    private static final List<Integer> DEFAULT_WARNINGS = List.of(1800, 900, 600, 300, 120, 60, 30, 15, 10, 5, 4, 3, 2, 1);
+    /** Seconds before a reboot at which a chat announcement goes out. */
+    private static final List<Integer> WARNINGS = List.of(1800, 900, 600, 300, 60, 30, 10);
+    /** The bossbar countdown shows up once the reboot is this close. */
+    public static final long BOSSBAR_WINDOW = TimeUnit.MINUTES.toMillis(30);
 
-    private boolean scheduleEnabled;
+    private static final String TITLE_COLOR = "<#FF6347>";
+    private static final String TEXT_COLOR = "<#E0E0E0>";
+
     private ZoneId zone;
     private final List<LocalTime> times = new ArrayList<>();
-    private final List<Integer> warnings = new ArrayList<>();
-    private List<String> warningMessage;
     private List<String> kickMessage;
-    private boolean useRestartScript;
 
+    /** Next reboot from the configured times, locked in until it happens or is skipped. */
+    private long scheduledAt = -1L;
     /** Manually scheduled reboot, overrides the configured times while set. */
     private long manualRebootAt = -1L;
-    /** Scheduled reboots at or before this instant are skipped (set by cancelling one). */
-    private long skipUntil = -1L;
 
     private long warnedFor = -1L;
     private final Set<Integer> announced = new HashSet<>();
     private boolean rebooting;
+
+    private final RebootBossBarProvider bossBar = new RebootBossBarProvider(this);
+    private boolean bossBarShown;
 
     private BukkitTask task;
 
@@ -60,14 +69,13 @@ public final class RebootService extends CService {
             task.cancel();
             task = null;
         }
+        setBossBarShown(false);
     }
 
     public void loadConfig() {
         ConfigurationSection config = Cobalt.getInstance().getConfig().getConfigurationSection("reboot");
 
         times.clear();
-        warnings.clear();
-        scheduleEnabled = config != null && config.getBoolean("enabled", false);
 
         String zoneId = config == null ? "" : config.getString("timezone", "");
         try {
@@ -87,12 +95,8 @@ public final class RebootService extends CService {
             }
         }
 
-        List<Integer> configured = config == null ? List.of() : config.getIntegerList("warnings");
-        warnings.addAll(configured.isEmpty() ? DEFAULT_WARNINGS : configured);
-
-        warningMessage = getLines(config, "warning-message", "&c&lREBOOT &7» &fThe server will reboot in &c<time>&f.");
         kickMessage = getLines(config, "kick-message", "&cThe server is rebooting. Please reconnect shortly.");
-        useRestartScript = config != null && config.getBoolean("use-restart-script", false);
+        scheduledAt = nextConfiguredAfter(System.currentTimeMillis());
     }
 
     /** A list of lines, or a single string as one line for older configs. */
@@ -106,20 +110,13 @@ public final class RebootService extends CService {
         return List.of(config.getString(path, fallback));
     }
 
-    /** Epoch millis of the next reboot, or -1 if none is scheduled. */
-    public long getNextReboot() {
-        if (manualRebootAt > 0L) {
-            return manualRebootAt;
-        }
-        if (!scheduleEnabled || times.isEmpty()) {
-            return -1L;
-        }
-
-        ZonedDateTime now = ZonedDateTime.now(zone);
+    /** Epoch millis of the first configured time strictly after the given instant, or -1 if there are no times. */
+    private long nextConfiguredAfter(long after) {
+        ZonedDateTime from = Instant.ofEpochMilli(after).atZone(zone);
         long next = -1L;
         for (LocalTime time : times) {
-            ZonedDateTime candidate = now.with(time);
-            if (!candidate.isAfter(now) || candidate.toInstant().toEpochMilli() <= skipUntil) {
+            ZonedDateTime candidate = from.with(time);
+            if (!candidate.isAfter(from)) {
                 candidate = candidate.plusDays(1);
             }
             long millis = candidate.toInstant().toEpochMilli();
@@ -128,6 +125,11 @@ public final class RebootService extends CService {
             }
         }
         return next;
+    }
+
+    /** Epoch millis of the next reboot, or -1 if none is scheduled. */
+    public long getNextReboot() {
+        return manualRebootAt > 0L ? manualRebootAt : scheduledAt;
     }
 
     /** Millis until the next reboot, or -1 if none is scheduled. */
@@ -151,11 +153,10 @@ public final class RebootService extends CService {
             manualRebootAt = -1L;
             return true;
         }
-        long next = getNextReboot();
-        if (next < 0L) {
+        if (scheduledAt < 0L) {
             return false;
         }
-        skipUntil = next;
+        scheduledAt = nextConfiguredAfter(scheduledAt);
         return true;
     }
 
@@ -166,6 +167,7 @@ public final class RebootService extends CService {
 
         long next = getNextReboot();
         if (next < 0L) {
+            setBossBarShown(false);
             return;
         }
         if (next != warnedFor) {
@@ -179,33 +181,59 @@ public final class RebootService extends CService {
             return;
         }
 
+        setBossBarShown(remaining <= BOSSBAR_WINDOW);
+
         // Catch-up safe: if ticks lag or we start inside the window, every passed warning is
         // marked at once and only one message goes out.
         long secondsLeft = (remaining + 999L) / 1000L;
         boolean announce = false;
-        for (int warning : warnings) {
+        for (int warning : WARNINGS) {
             if (secondsLeft <= warning && announced.add(warning)) {
                 announce = true;
             }
         }
         if (announce) {
-            String time = TimeFormat.words(secondsLeft * 1000L);
-            for (String line : warningMessage) {
-                Bukkit.broadcast(Coloring.toComponent(line.replace("<time>", time)));
-            }
+            announce(secondsLeft * 1000L);
         }
     }
 
-    /** Kicks everyone and stops the server right now. */
+    private void announce(long remaining) {
+        Bukkit.broadcast(Coloring.toComponent(""));
+        Bukkit.broadcast(Coloring.toComponent(TITLE_COLOR + "<bold>Server Reboot"));
+        Bukkit.broadcast(Coloring.toComponent(TEXT_COLOR + "The server will reboot in <underlined>" + TimeFormat.words(remaining) + "</underlined>."));
+        Bukkit.broadcast(Coloring.toComponent(TEXT_COLOR + "Please find somewhere safe before then."));
+        Bukkit.broadcast(Coloring.toComponent(""));
+    }
+
+    private void setBossBarShown(boolean shown) {
+        BossBarService bossBars = CobaltAPI.getBossBarService();
+        if (bossBars == null || shown == bossBarShown) {
+            return;
+        }
+        bossBarShown = shown;
+        if (shown) {
+            bossBars.registerProvider(bossBar, Integer.MAX_VALUE);
+        } else {
+            bossBars.unregisterProvider(bossBar);
+        }
+    }
+
+    /** Kicks everyone and restarts the server right now. */
     public void reboot() {
+        if (rebooting) {
+            return;
+        }
         rebooting = true;
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        setBossBarShown(false);
+
+        Cobalt.getInstance().getLogger().info("Rebooting the server.");
+        Bukkit.savePlayers();
+        for (Player player : List.copyOf(Bukkit.getOnlinePlayers())) {
             player.kick(Coloring.toComponent(String.join("\n", kickMessage)));
         }
-        if (useRestartScript) {
-            Bukkit.spigot().restart();
-        } else {
-            Bukkit.shutdown();
-        }
+
+        // Runs settings.restart-script from spigot.yml so the server comes back up;
+        // without that script it just stops, leaving it to the host to start it again.
+        Bukkit.restart();
     }
 }
