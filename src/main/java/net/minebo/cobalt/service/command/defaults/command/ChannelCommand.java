@@ -15,6 +15,7 @@ import net.minebo.cobalt.service.chat.ChatService;
 import net.minebo.cobalt.util.Coloring;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public final class ChannelCommand extends BaseCommand {
         completions.registerCompletion("chatchannels", c -> {
             ChatService service = CobaltAPI.getChatService();
             if (service == null) {
-                return List.of();
+                return Arrays.asList();
             }
             return service.getChannels().stream()
                     .filter(channel -> !(c.getSender() instanceof Player player) || channel.canSpeak(player))

@@ -1,8 +1,6 @@
 package net.minebo.cobalt.service.command.defaults.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.BukkitCommandCompletions;
-import co.aikar.commands.BukkitCommandManager;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.CatchUnknown;
 import co.aikar.commands.annotation.CommandAlias;
@@ -23,23 +21,11 @@ import net.minebo.cobalt.service.hologram.menu.HologramEditorMenu;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.stream.Collectors;
 
 @CommandAlias("holo|hologram")
 @CommandPermission("cobalt.hologram")
 @Description("Create and manage packet holograms.")
 public final class HologramCommand extends BaseCommand {
-
-    public static void registerCompletions(BukkitCommandManager manager) {
-        BukkitCommandCompletions completions = (BukkitCommandCompletions) manager.getCommandCompletions();
-
-        // Every registered hologram id (excluding internal ones)
-        completions.registerCompletion("holograms", c ->
-                CobaltAPI.getHologramService().registry().all().stream()
-                        .filter(hologram -> !hologram.internal())
-                        .map(Hologram::id)
-                        .collect(Collectors.toList()));
-    }
 
     @Default
     @CatchUnknown
@@ -82,15 +68,7 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("[id]")
     @Description("Open the hologram editor menu.")
     @CommandCompletion("@holograms")
-    public void onManage(Player player, @Optional String id) {
-        if (id == null) {
-            new HologramEditorMenu(CobaltAPI.getHologramService(), null).openMenu(player);
-            return;
-        }
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onManage(Player player, @Optional Hologram hologram) {
         new HologramEditorMenu(CobaltAPI.getHologramService(), hologram).openMenu(player);
     }
 
@@ -98,11 +76,7 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("<id>")
     @Description("Move a hologram to your location.")
     @CommandCompletion("@holograms")
-    public void onHere(Player player, String id) {
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onHere(Player player, Hologram hologram) {
         CobaltAPI.getHologramService().teleportHere(hologram, player);
         player.sendMessage(Component.text("Moved " + hologram.id() + " to you.", NamedTextColor.GREEN));
     }
@@ -111,11 +85,7 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("<id> <text>")
     @Description("Add a line to a hologram.")
     @CommandCompletion("@holograms @nothing")
-    public void onLineAdd(Player player, String id, String text) {
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onLineAdd(Player player, Hologram hologram, String text) {
         CobaltAPI.getHologramService().addLine(hologram, text);
         player.sendMessage(Component.text("Added line #" + (hologram.lines().size() - 1) + ".", NamedTextColor.GREEN));
     }
@@ -124,11 +94,7 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("<id> <index> <text>")
     @Description("Change a line on a hologram.")
     @CommandCompletion("@holograms @range:0-9 @nothing")
-    public void onLineSet(Player player, String id, int index, String text) {
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onLineSet(Player player, Hologram hologram, int index, String text) {
         if (!CobaltAPI.getHologramService().setLine(hologram, index, text)) {
             player.sendMessage(Component.text("No line at " + index, NamedTextColor.RED));
             return;
@@ -140,11 +106,7 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("<id> <index>")
     @Description("Remove a line from a hologram.")
     @CommandCompletion("@holograms @range:0-9")
-    public void onLineRemove(Player player, String id, int index) {
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onLineRemove(Player player, Hologram hologram, int index) {
         if (!CobaltAPI.getHologramService().removeLine(hologram, index)) {
             player.sendMessage(Component.text("No line at " + index, NamedTextColor.RED));
             return;
@@ -156,11 +118,7 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("<id> <blocks>")
     @Description("Set how far away players can see a hologram.")
     @CommandCompletion("@holograms 16|32|48|64")
-    public void onViewDistance(Player player, String id, double blocks) {
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onViewDistance(Player player, Hologram hologram, double blocks) {
         CobaltAPI.getHologramService().setViewDistance(hologram, blocks);
         player.sendMessage(Component.text("View distance set to " + hologram.viewDistance(), NamedTextColor.GREEN));
     }
@@ -169,21 +127,9 @@ public final class HologramCommand extends BaseCommand {
     @Syntax("<id>")
     @Description("Delete a hologram.")
     @CommandCompletion("@holograms")
-    public void onDelete(Player player, String id) {
-        Hologram hologram = require(player, id);
-        if (hologram == null) {
-            return;
-        }
+    public void onDelete(Player player, Hologram hologram) {
         CobaltAPI.getHologramService().delete(hologram);
-        player.sendMessage(Component.text("Deleted " + id, NamedTextColor.RED));
+        player.sendMessage(Component.text("Deleted " + hologram.id(), NamedTextColor.RED));
     }
 
-    private Hologram require(Player player, String id) {
-        Hologram hologram = CobaltAPI.getHologramService().byId(id);
-        if (hologram == null || hologram.internal()) {
-            player.sendMessage(Component.text("No hologram named " + id, NamedTextColor.RED));
-            return null;
-        }
-        return hologram;
-    }
 }

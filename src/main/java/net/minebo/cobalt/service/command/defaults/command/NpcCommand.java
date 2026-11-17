@@ -43,12 +43,6 @@ public final class NpcCommand extends BaseCommand {
     public static void registerCompletions(BukkitCommandManager manager) {
         BukkitCommandCompletions completions = (BukkitCommandCompletions) manager.getCommandCompletions();
 
-        // Every registered NPC name
-        completions.registerCompletion("npcs", c ->
-                CobaltAPI.getNpcService().registry().all().stream()
-                        .map(Npc::name)
-                        .collect(Collectors.toList()));
-
         // Entity types an NPC can be created as
         completions.registerCompletion("npctypes", c ->
                 Arrays.stream(EntityType.values())
@@ -115,15 +109,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("[npc]")
     @Description("Open the NPC editor menu.")
     @CommandCompletion("@npcs")
-    public void onManage(Player player, @Optional String npcName) {
-        if (npcName == null) {
-            new NpcEditorMenu(CobaltAPI.getNpcService(), null).openMenu(player);
-            return;
-        }
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onManage(Player player, @Optional Npc npc) {
         new NpcEditorMenu(CobaltAPI.getNpcService(), npc).openMenu(player);
     }
 
@@ -131,11 +117,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc>")
     @Description("Move an NPC to your location.")
     @CommandCompletion("@npcs")
-    public void onHere(Player player, String npcName) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onHere(Player player, Npc npc) {
         CobaltAPI.getNpcService().teleportHere(npc, player);
         player.sendMessage(Component.text("Moved " + npc.name() + " to you.", NamedTextColor.GREEN));
     }
@@ -144,11 +126,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc>")
     @Description("Open the hologram line editor for an NPC.")
     @CommandCompletion("@npcs")
-    public void onHolo(Player player, String npcName) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onHolo(Player player, Npc npc) {
         if (CobaltAPI.getNpcService().holograms() == null) {
             player.sendMessage(Component.text("Hologram service is not hooked.", NamedTextColor.RED));
             return;
@@ -165,13 +143,13 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <text>")
     @Description("Add a hologram line to an NPC.")
     @CommandCompletion("@npcs @nothing")
-    public void onLineAdd(Player player, String npcName, String text) {
-        Hologram hologram = requireHologram(player, npcName);
+    public void onLineAdd(Player player, Npc npc, String text) {
+        Hologram hologram = requireHologram(player, npc);
         if (hologram == null) {
             return;
         }
         CobaltAPI.getNpcService().holograms().addLine(hologram, text);
-        CobaltAPI.getNpcService().captureHologram(CobaltAPI.getNpcService().byName(npcName));
+        CobaltAPI.getNpcService().captureHologram(npc);
         player.sendMessage(Component.text("Added hologram line.", NamedTextColor.GREEN));
     }
 
@@ -179,8 +157,8 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <index> <text>")
     @Description("Change a hologram line on an NPC.")
     @CommandCompletion("@npcs @range:0-9 @nothing")
-    public void onLineSet(Player player, String npcName, int index, String text) {
-        Hologram hologram = requireHologram(player, npcName);
+    public void onLineSet(Player player, Npc npc, int index, String text) {
+        Hologram hologram = requireHologram(player, npc);
         if (hologram == null) {
             return;
         }
@@ -188,7 +166,7 @@ public final class NpcCommand extends BaseCommand {
             player.sendMessage(Component.text("No line at " + index, NamedTextColor.RED));
             return;
         }
-        CobaltAPI.getNpcService().captureHologram(CobaltAPI.getNpcService().byName(npcName));
+        CobaltAPI.getNpcService().captureHologram(npc);
         player.sendMessage(Component.text("Updated line #" + index + ".", NamedTextColor.GREEN));
     }
 
@@ -196,8 +174,8 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <index>")
     @Description("Remove a hologram line from an NPC.")
     @CommandCompletion("@npcs @range:0-9")
-    public void onLineRemove(Player player, String npcName, int index) {
-        Hologram hologram = requireHologram(player, npcName);
+    public void onLineRemove(Player player, Npc npc, int index) {
+        Hologram hologram = requireHologram(player, npc);
         if (hologram == null) {
             return;
         }
@@ -205,7 +183,7 @@ public final class NpcCommand extends BaseCommand {
             player.sendMessage(Component.text("No line at " + index, NamedTextColor.RED));
             return;
         }
-        CobaltAPI.getNpcService().captureHologram(CobaltAPI.getNpcService().byName(npcName));
+        CobaltAPI.getNpcService().captureHologram(npc);
         player.sendMessage(Component.text("Removed line #" + index + ".", NamedTextColor.GREEN));
     }
 
@@ -213,11 +191,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <username|me|viewer>")
     @Description("Set a player NPC's skin.")
     @CommandCompletion("@npcs @npcskins")
-    public void onSkin(Player player, String npcName, String target) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onSkin(Player player, Npc npc, String target) {
         if (!npc.isPlayerNpc()) {
             player.sendMessage(Component.text("Skins only work on player NPCs.", NamedTextColor.RED));
             return;
@@ -240,11 +214,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <pose>")
     @Description("Change an NPC's pose.")
     @CommandCompletion("@npcs @npcposes")
-    public void onPose(Player player, String npcName, NpcPose pose) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onPose(Player player, Npc npc, NpcPose pose) {
         CobaltAPI.getNpcService().setPose(npc, pose);
         player.sendMessage(Component.text("Pose set.", NamedTextColor.GREEN));
     }
@@ -253,11 +223,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <on|off> [distance]")
     @Description("Toggle whether an NPC looks at nearby players.")
     @CommandCompletion("@npcs on|off 4|8|16|32")
-    public void onLook(Player player, String npcName, String toggle, @Optional Double distance) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onLook(Player player, Npc npc, String toggle, @Optional Double distance) {
         boolean enabled = toggle.equalsIgnoreCase("on") || toggle.equalsIgnoreCase("true");
         npc.setLookAtPlayers(enabled);
         if (distance != null) {
@@ -271,11 +237,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <blocks>")
     @Description("Set how far away players can see an NPC.")
     @CommandCompletion("@npcs 16|32|48|64")
-    public void onViewDistance(Player player, String npcName, double blocks) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onViewDistance(Player player, Npc npc, double blocks) {
         npc.setViewDistance(blocks);
         CobaltAPI.getNpcService().ensureNameHologram(npc);
         CobaltAPI.getNpcService().save(npc);
@@ -286,11 +248,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <message|player_command|console_command> <value>")
     @Description("Add a click action to an NPC.")
     @CommandCompletion("@npcs @npcactions @nothing")
-    public void onAction(Player player, String npcName, NpcActionType type, String value) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onAction(Player player, Npc npc, NpcActionType type, String value) {
         npc.actions().add(new NpcAction(type, value));
         CobaltAPI.getNpcService().save(npc);
         player.sendMessage(Component.text("Added action #" + (npc.actions().size() - 1) + ".", NamedTextColor.GREEN));
@@ -300,11 +258,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc> <index>")
     @Description("Remove a click action from an NPC.")
     @CommandCompletion("@npcs @range:0-9")
-    public void onActionRemove(Player player, String npcName, int index) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onActionRemove(Player player, Npc npc, int index) {
         if (!npc.removeAction(index)) {
             player.sendMessage(Component.text("No action at " + index, NamedTextColor.RED));
             return;
@@ -317,11 +271,7 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc>")
     @Description("Clear all click actions from an NPC.")
     @CommandCompletion("@npcs")
-    public void onActionClear(Player player, String npcName) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onActionClear(Player player, Npc npc) {
         npc.actions().clear();
         CobaltAPI.getNpcService().save(npc);
         player.sendMessage(Component.text("Cleared actions.", NamedTextColor.GREEN));
@@ -331,28 +281,13 @@ public final class NpcCommand extends BaseCommand {
     @Syntax("<npc>")
     @Description("Delete an NPC.")
     @CommandCompletion("@npcs")
-    public void onDelete(Player player, String npcName) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return;
-        }
+    public void onDelete(Player player, Npc npc) {
         CobaltAPI.getNpcService().delete(npc);
         player.sendMessage(Component.text("Deleted " + npc.name(), NamedTextColor.RED));
     }
 
-    private Npc requireNpc(Player player, String name) {
-        Npc npc = CobaltAPI.getNpcService().byName(name);
-        if (npc == null) {
-            player.sendMessage(Component.text("No NPC named " + name, NamedTextColor.RED));
-        }
-        return npc;
-    }
 
-    private Hologram requireHologram(Player player, String npcName) {
-        Npc npc = requireNpc(player, npcName);
-        if (npc == null) {
-            return null;
-        }
+    private Hologram requireHologram(Player player, Npc npc) {
         if (CobaltAPI.getNpcService().holograms() == null) {
             player.sendMessage(Component.text("Hologram service is not hooked.", NamedTextColor.RED));
             return null;

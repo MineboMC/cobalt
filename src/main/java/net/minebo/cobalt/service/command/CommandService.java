@@ -3,27 +3,21 @@ package net.minebo.cobalt.service.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandCompletions;
 import co.aikar.commands.PaperCommandManager;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import co.aikar.commands.contexts.ContextResolver;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.service.CService;
 import net.minebo.cobalt.service.command.defaults.command.ChannelCommand;
-import net.minebo.cobalt.service.command.defaults.command.HologramCommand;
 import net.minebo.cobalt.service.command.defaults.command.NpcCommand;
 import net.minebo.cobalt.service.command.defaults.command.ProjectileCommand;
-import net.minebo.cobalt.service.command.defaults.completion.ChatColorCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.completion.DyeColorCompletionHandler;
-import net.minebo.cobalt.service.command.defaults.completion.EnchantCompletionHandler;
 import net.minebo.cobalt.service.command.defaults.completion.MaterialCompletionHandler;
-import net.minebo.cobalt.service.command.defaults.completion.PlayerCompletionHandler;
-import net.minebo.cobalt.service.command.defaults.context.ChatColorContextResolver;
-import net.minebo.cobalt.service.command.defaults.context.CommandFlagsContextResolver;
-import net.minebo.cobalt.service.command.defaults.context.EnchantmentContextResolver;
-import net.minebo.cobalt.service.command.defaults.context.OnlinePlayerContextResolver;
-import net.minebo.cobalt.service.command.defaults.context.UUIDContextResolver;
-import net.minebo.cobalt.service.command.flag.CommandFlags;
-import org.bukkit.ChatColor;
-import org.bukkit.enchantments.Enchantment;
+import net.minebo.cobalt.service.command.defaults.context.ChatColorContext;
+import net.minebo.cobalt.service.command.defaults.context.CommandFlagsContext;
+import net.minebo.cobalt.service.command.defaults.context.EnchantmentContext;
+import net.minebo.cobalt.service.command.defaults.context.HologramContext;
+import net.minebo.cobalt.service.command.defaults.context.NpcContext;
+import net.minebo.cobalt.service.command.defaults.context.OnlinePlayerContext;
+import net.minebo.cobalt.service.command.defaults.context.UUIDContext;
 import org.bukkit.plugin.Plugin;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -35,7 +29,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class CommandService extends CService {
 
@@ -65,20 +58,19 @@ public class CommandService extends CService {
     }
 
     private void registerDefaults(PaperCommandManager manager) {
-        registerContext(manager, ChatColor.class, new ChatColorContextResolver());
-        registerContext(manager, OnlinePlayer.class, new OnlinePlayerContextResolver());
-        registerContext(manager, UUID.class, new UUIDContextResolver());
-        registerContext(manager, Enchantment.class, new EnchantmentContextResolver());
-        registerContext(manager, CommandFlags.class, new CommandFlagsContextResolver());
+        new ChatColorContext().register(manager);
+        new OnlinePlayerContext().register(manager);
+        new UUIDContext().register(manager);
+        new EnchantmentContext().register(manager);
+        new CommandFlagsContext().register(manager);
+        new HologramContext().register(manager);
+        new NpcContext().register(manager);
 
+        // ACF already resolves enums, so these only need completions.
         CommandCompletions<?> completions = manager.getCommandCompletions();
-        completions.registerCompletion("chatcolors", new ChatColorCompletionHandler());
         completions.registerCompletion("materials", new MaterialCompletionHandler());
-        completions.registerCompletion("players", new PlayerCompletionHandler());
         completions.registerCompletion("dyecolors", new DyeColorCompletionHandler());
-        completions.registerCompletion("enchants", new EnchantCompletionHandler());
 
-        HologramCommand.registerCompletions(manager);
         NpcCommand.registerCompletions(manager);
         ProjectileCommand.registerCompletions(manager);
         ChannelCommand.registerCompletions(manager);
@@ -96,14 +88,13 @@ public class CommandService extends CService {
         getManager(plugin).getCommandCompletions().registerCompletion(id, handler);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public void registerContext(Plugin plugin, Class clazz, ContextResolver resolver) {
-        registerContext(getManager(plugin), clazz, resolver);
+    public void registerContext(Plugin plugin, CommonCommandContext<?> context) {
+        context.register(getManager(plugin));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void registerContext(PaperCommandManager manager, Class clazz, ContextResolver resolver) {
-        manager.getCommandContexts().registerContext(clazz, resolver);
+    public void registerContext(Plugin plugin, Class clazz, ContextResolver resolver) {
+        getManager(plugin).getCommandContexts().registerContext(clazz, resolver);
     }
 
     public void registerCommand(Plugin plugin, BaseCommand command) {
