@@ -80,10 +80,9 @@ public final class TabLayout {
         return column * ROWS + row;
     }
 
+    /** The client shows higher orders first, filling each column top to bottom before the next one right. */
     public static int listOrder(int index) {
-        int column = index / ROWS;
-        int row = index % ROWS;
-        return column * ROWS + (ROWS - 1 - row);
+        return MAX_SLOTS - 1 - index;
     }
 
     public boolean valid(int column, int row) {
