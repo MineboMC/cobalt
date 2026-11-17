@@ -107,16 +107,20 @@ public final class BossBarService extends CService {
             return;
         }
 
-        BossBarProvider provider = registry.select();
-        if (provider == null) {
-            hide(player);
-            return;
+        // Highest weight first, a provider with a null title has nothing to show so the next one gets a turn.
+        ShownBar next = null;
+        for (BossBarProvider provider : registry.all()) {
+            try {
+                next = ShownBar.from(provider, player);
+            } catch (Exception exception) {
+                next = null;
+            }
+            if (next != null) {
+                break;
+            }
         }
 
-        ShownBar next;
-        try {
-            next = ShownBar.from(provider, player);
-        } catch (Exception exception) {
+        if (next == null) {
             hide(player);
             return;
         }

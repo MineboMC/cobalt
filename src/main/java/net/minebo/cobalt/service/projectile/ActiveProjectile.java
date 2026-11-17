@@ -25,6 +25,7 @@ public final class ActiveProjectile {
 
     private static final int SHOOTER_GRACE_TICKS = 5;
     private static final int MAX_HITS_PER_TICK = 8;
+    private static final double INSTANT_RANGE = 100;
 
     private final UUID id = UUID.randomUUID();
     private final ProjectileService service;
@@ -60,6 +61,7 @@ public final class ActiveProjectile {
     public ProjectileType type() { return type; }
     public Entity shooter() { return shooter; }
     public World world() { return world; }
+    /** Null for an instant projectile. */
     public Display display() { return display; }
     public Location location() { return position.toLocation(world); }
     public Vector velocity() { return velocity.clone(); }
@@ -79,7 +81,7 @@ public final class ActiveProjectile {
             return;
         }
         removed = true;
-        if (display.isValid()) {
+        if (display != null && display.isValid()) {
             display.remove();
         }
         service.untrack(this);
@@ -89,7 +91,7 @@ public final class ActiveProjectile {
         if (removed) {
             return;
         }
-        if (!display.isValid() || !world.isChunkLoaded(position.getBlockX() >> 4, position.getBlockZ() >> 4)) {
+        if (display == null || !display.isValid() || !world.isChunkLoaded(position.getBlockX() >> 4, position.getBlockZ() >> 4)) {
             remove();
             return;
         }
@@ -115,6 +117,26 @@ public final class ActiveProjectile {
         updateDisplay();
 
         if (ticksLived >= type.maxLifetime || (type.maxDistance > 0 && distanceTravelled >= type.maxDistance)) {
+            expire();
+        }
+    }
+
+    /** An instant projectile's whole flight, bounces included, then it's gone. */
+    void fire() {
+        double range = type.maxDistance > 0 ? type.maxDistance : INSTANT_RANGE;
+        for (int leg = 0; leg <= type.bounces && !removed; leg++) {
+            double remaining = range - distanceTravelled;
+            if (remaining <= 1.0E-6 || velocity.lengthSquared() < 1.0E-6) {
+                break;
+            }
+            int bounces = bouncesLeft;
+            move(position.clone(), velocity.clone().normalize(), remaining);
+            // Only a bounce leaves it alive short of the range, anything else means the flight's over.
+            if (bouncesLeft == bounces) {
+                break;
+            }
+        }
+        if (!removed) {
             expire();
         }
     }

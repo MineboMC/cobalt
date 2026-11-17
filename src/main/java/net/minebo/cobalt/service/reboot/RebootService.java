@@ -200,8 +200,7 @@ public final class RebootService extends CService {
     private void announce(long remaining) {
         Bukkit.broadcast(Coloring.toComponent(""));
         Bukkit.broadcast(Coloring.toComponent(TITLE_COLOR + "<bold>Server Reboot"));
-        Bukkit.broadcast(Coloring.toComponent(TEXT_COLOR + "The server will reboot in <underlined>" + TimeFormat.words(remaining) + "</underlined>."));
-        Bukkit.broadcast(Coloring.toComponent(TEXT_COLOR + "Please find somewhere safe before then."));
+        Bukkit.broadcast(Coloring.toComponent("<gray>The server will reboot in <underlined>" + TEXT_COLOR + TimeFormat.words(remaining) + "</underlined><gray>."));
         Bukkit.broadcast(Coloring.toComponent(""));
     }
 

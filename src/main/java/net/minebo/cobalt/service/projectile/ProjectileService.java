@@ -74,29 +74,46 @@ public final class ProjectileService extends CService {
     }
 
     public ActiveProjectile launch(ProjectileType type, LivingEntity shooter) {
+        return launch(type, shooter, null);
+    }
+
+    /** {@code setup} runs before the launch callbacks, and for an instant projectile before it hits anything. */
+    public ActiveProjectile launch(ProjectileType type, LivingEntity shooter, Consumer<ActiveProjectile> setup) {
         Location eye = shooter.getEyeLocation();
         Vector direction = eye.getDirection();
         Location origin = eye.clone()
                 .add(direction.clone().multiply(type.forwardOffset))
                 .add(0, type.verticalOffset, 0);
-        return launch(type, origin, direction.multiply(type.speed), shooter);
+        return launch(type, origin, direction.multiply(type.speed), shooter, setup);
     }
 
     public ActiveProjectile launch(ProjectileType type, Location origin, Vector velocity, Entity shooter) {
+        return launch(type, origin, velocity, shooter, null);
+    }
+
+    public ActiveProjectile launch(ProjectileType type, Location origin, Vector velocity, Entity shooter, Consumer<ActiveProjectile> setup) {
         Vector launchVelocity = applySpread(velocity, type.spread);
         Location spawn = origin.clone();
         if (launchVelocity.lengthSquared() > 1.0E-6) {
             spawn.setDirection(launchVelocity);
         }
 
-        Display display = spawnDisplay(type, spawn);
+        Display display = type.instant ? null : spawnDisplay(type, spawn);
         ActiveProjectile projectile = new ActiveProjectile(this, type, shooter, origin, launchVelocity, display);
-        display.getPersistentDataContainer().set(projectileKey, PersistentDataType.STRING, projectile.id().toString());
+        if (display != null) {
+            display.getPersistentDataContainer().set(projectileKey, PersistentDataType.STRING, projectile.id().toString());
+        }
         active.put(projectile.id(), projectile);
 
+        if (setup != null) {
+            setup.accept(projectile);
+        }
         projectile.playSound(type.launchSound, origin);
         if (type.onLaunch != null) {
             type.onLaunch.accept(projectile);
+        }
+        if (type.instant && !projectile.isRemoved()) {
+            projectile.fire();
         }
         return projectile;
     }

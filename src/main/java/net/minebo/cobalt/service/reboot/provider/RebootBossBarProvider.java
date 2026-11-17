@@ -21,7 +21,7 @@ public final class RebootBossBarProvider implements BossBarProvider {
         long remaining = Math.max(0L, service.getTimeUntilReboot());
         // Round up so the bar reads 00:01 during the last second, not 00:00.
         long rounded = (remaining + 999L) / 1000L * 1000L;
-        return Coloring.toComponent("<#FF6347><bold>Server Reboot</bold> <dark_gray>» <white>" + TimeFormat.minutes(rounded));
+        return Coloring.toComponent("<#FF6347><bold>Server Reboot</bold> in <white>" + TimeFormat.auto(rounded));
     }
 
     @Override

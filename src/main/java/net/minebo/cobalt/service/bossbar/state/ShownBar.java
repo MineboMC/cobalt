@@ -34,9 +34,14 @@ public final class ShownBar {
                 : EnumSet.copyOf(flags);
     }
 
+    /** Null when the provider's title is null, meaning it has no bar to show right now. */
     public static ShownBar from(BossBarProvider provider, Player player) {
+        Component title = provider.getTitle(player);
+        if (title == null) {
+            return null;
+        }
         return new ShownBar(
-                provider.getTitle(player),
+                title,
                 provider.getHealth(player),
                 provider.getColor(player),
                 provider.getOverlay(player),

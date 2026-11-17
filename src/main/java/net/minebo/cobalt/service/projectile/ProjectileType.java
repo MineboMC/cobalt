@@ -34,6 +34,7 @@ public final class ProjectileType {
     final double spread;
     final int maxLifetime;
     final double maxDistance;
+    final boolean instant;
     final double forwardOffset;
     final double verticalOffset;
 
@@ -78,6 +79,7 @@ public final class ProjectileType {
         this.spread = b.spread;
         this.maxLifetime = b.maxLifetime;
         this.maxDistance = b.maxDistance;
+        this.instant = b.instant;
         this.forwardOffset = b.forwardOffset;
         this.verticalOffset = b.verticalOffset;
         this.hitboxRadius = b.hitboxRadius;
@@ -139,6 +141,7 @@ public final class ProjectileType {
         b.spread = spread;
         b.maxLifetime = maxLifetime;
         b.maxDistance = maxDistance;
+        b.instant = instant;
         b.forwardOffset = forwardOffset;
         b.verticalOffset = verticalOffset;
         b.hitboxRadius = hitboxRadius;
@@ -175,6 +178,7 @@ public final class ProjectileType {
     public double spread() { return spread; }
     public int maxLifetime() { return maxLifetime; }
     public double maxDistance() { return maxDistance; }
+    public boolean instant() { return instant; }
     public double hitboxRadius() { return hitboxRadius; }
     public int pierce() { return pierce; }
     public int bounces() { return bounces; }
@@ -197,6 +201,7 @@ public final class ProjectileType {
         private double spread = 0;
         private int maxLifetime = 100;
         private double maxDistance = 0;
+        private boolean instant = false;
         private double forwardOffset = 0.5;
         private double verticalOffset = -0.1;
 
@@ -243,6 +248,8 @@ public final class ProjectileType {
         public Builder spread(double degrees) { this.spread = Math.max(0, degrees); return this; }
         public Builder lifetime(int ticks) { this.maxLifetime = Math.max(1, ticks); return this; }
         public Builder maxDistance(double blocks) { this.maxDistance = Math.max(0, blocks); return this; }
+        /** Hitscan: the whole flight, up to maxDistance, is traced and drawn the moment it's launched. No display entity. */
+        public Builder instant() { this.instant = true; return this; }
         public Builder spawnOffset(double forward, double vertical) { this.forwardOffset = forward; this.verticalOffset = vertical; return this; }
 
         public Builder hitbox(double radius) { this.hitboxRadius = Math.max(0, radius); return this; }
