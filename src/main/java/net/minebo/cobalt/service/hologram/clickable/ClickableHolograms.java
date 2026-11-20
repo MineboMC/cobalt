@@ -68,15 +68,16 @@ public final class ClickableHolograms extends PacketListenerAbstract implements 
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
-        if (!(event.getPlayer() instanceof Player player)) return;
-
         PacketType.Play.Client type = event.getPacketType() instanceof PacketType.Play.Client client ? client : null;
+        if (type != PacketType.Play.Client.INTERACT_ENTITY && type != PacketType.Play.Client.ANIMATION && type != PacketType.Play.Client.USE_ITEM) return;
+        if (!(event.getPlayer() instanceof Player player)) return;
+        // swings come from every player, most of them have no hologram to click
+        if (holograms.stream().noneMatch(hologram -> hologram.getViewer() == player)) return;
+
         if (type == PacketType.Play.Client.INTERACT_ENTITY) {
             int entityId = new WrapperPlayClientInteractEntity(event).getEntityId();
             if (holograms.stream().noneMatch(hologram -> hologram.getViewer() == player && hologram.owns(entityId))) return;
             event.setCancelled(true); // the server's never heard of it
-        } else if (type != PacketType.Play.Client.ANIMATION && type != PacketType.Play.Client.USE_ITEM) {
-            return;
         }
 
         Bukkit.getScheduler().runTask(Cobalt.getInstance(), () -> click(player));

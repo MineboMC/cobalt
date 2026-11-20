@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class HologramRegistry {
-    private static final int START_ID = 900_000;
+    // far past anything the server's own entity counter reaches, so a hologram never shares an id with a real entity
+    private static final int START_ID = 1_000_000_000;
     private static final int LINE_BUDGET = 32;
     private final Map<String, Hologram> holograms = new ConcurrentHashMap<>();
     private final AtomicInteger nextId = new AtomicInteger(START_ID);

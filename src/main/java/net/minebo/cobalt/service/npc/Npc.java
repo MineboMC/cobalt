@@ -97,7 +97,7 @@ public final class Npc {
     public boolean isPlayerNpc() { return type == EntityType.PLAYER; }
 
     public Location location() {
-        World world = Bukkit.getWorld(worldName);
+        World world = worldName == null ? null : Bukkit.getWorld(worldName);
         if (world == null) return null;
         return new Location(world, x, y, z, yaw, pitch);
     }

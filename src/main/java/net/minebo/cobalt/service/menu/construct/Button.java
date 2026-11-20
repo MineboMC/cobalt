@@ -1,6 +1,8 @@
 package net.minebo.cobalt.service.menu.construct;
 
 import lombok.AllArgsConstructor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minebo.cobalt.util.Coloring;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -39,26 +41,22 @@ public class Button {
     }
 
     public Button setName(String name) {
-        this.name = () -> Coloring.translateColors((name));
+        this.name = () -> name;
         return this;
     }
 
     public Button setName(Supplier<String> nameSupplier) {
-        this.name = () -> Coloring.translateColors((nameSupplier.get()));
+        this.name = nameSupplier;
         return this;
     }
 
     public Button setLines(String... dynamicLines) {
-        this.lines = () -> Arrays.stream(dynamicLines)
-                .map(Coloring::translateColors)
-                .toList();
+        this.lines = () -> Arrays.asList(dynamicLines);
         return this;
     }
 
     public Button setLines(Supplier<List<String>> linesSupplier) {
-        this.lines = () -> linesSupplier.get().stream()
-                .map(Coloring::translateColors)
-                .toList();
+        this.lines = linesSupplier;
         return this;
     }
 
@@ -131,12 +129,17 @@ public class Button {
         }
 
         if (meta != null) {
-            meta.setDisplayName(name.get());
-            meta.setLore(lines.get());
+            // Components rather than legacy strings so tags like <head> and <sprite> survive
+            meta.displayName(text(name.get()));
+            meta.lore(lines.get().stream().map(Button::text).toList());
             item.setItemMeta(meta);
         }
 
         return item;
+    }
+
+    private static Component text(String miniMessage) {
+        return Coloring.toComponent(miniMessage).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
     public void onClick(ClickType clickType, Player player) {

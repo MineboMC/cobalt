@@ -2,11 +2,21 @@ package net.minebo.cobalt.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class Coloring {
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
+
+    /**
+     * Adds a custom MiniMessage tag (e.g. <flag:us>) to everything Coloring parses.
+     * Tags that render objects only survive the Component methods, not legacy strings.
+     */
+    public static void registerTag(TagResolver tag) {
+        TagResolver current = MINI_MESSAGE.tags();
+        MINI_MESSAGE = MiniMessage.builder().tags(TagResolver.resolver(current, tag)).build();
+    }
 
     /**
      * Legacy (&) + MiniMessage -> legacy section-sign string.

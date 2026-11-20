@@ -13,6 +13,10 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import net.minebo.cobalt.Cobalt;
 import net.minebo.cobalt.CobaltAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ObjectComponent;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minebo.cobalt.util.Coloring;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -32,14 +36,22 @@ import java.util.function.Consumer;
  */
 public final class ClickableHologram {
 
-    /** A line's text (MiniMessage or legacy) and what clicking it does, null if nothing. */
-    public record Line(String text, Consumer<Player> action) {
+    /** A line's text and what clicking it does, null if nothing. Text can be MiniMessage (or legacy), or a built component. */
+    public record Line(Component text, Consumer<Player> action) {
 
         public static Line text(String text) {
+            return text(Coloring.toComponent(text == null ? "" : text));
+        }
+
+        public static Line text(Component text) {
             return new Line(text, null);
         }
 
         public static Line clickable(String text, Consumer<Player> action) {
+            return clickable(Coloring.toComponent(text == null ? "" : text), action);
+        }
+
+        public static Line clickable(Component text, Consumer<Player> action) {
             return new Line(text, action);
         }
 
@@ -54,6 +66,7 @@ public final class ClickableHologram {
     private static final float HOVER_SCALE = 1.25F;
     private static final int HOVER_TICKS = 3;
     private static final int NO_WRAP = 1000;
+    private static final int OBJECT_WIDTH = 9;
 
     private final Player viewer;
     private final int baseId;
@@ -225,15 +238,15 @@ public final class ClickableHologram {
                 new EntityData<>(12, EntityDataTypes.VECTOR3F, new Vector3f(scale, scale, scale)));
     }
 
-    private static EntityData<?> text(String text) {
-        return new EntityData<>(23, EntityDataTypes.ADV_COMPONENT, Coloring.toComponent(text == null ? "" : text));
+    private static EntityData<?> text(Component text) {
+        return new EntityData<>(23, EntityDataTypes.ADV_COMPONENT, text);
     }
 
-    /** About how wide the text is in blocks, from the default font's character widths. */
-    static double width(String text) {
-        String plain = Coloring.strip(text == null ? "" : text);
-        boolean bold = text != null && (text.contains("<bold>") || text.contains("<b>") || text.contains("&l"));
-        int pixels = 0;
+    /** About how wide the text is in blocks, from the default font's character widths. Heads and sprites are a character each. */
+    static double width(Component text) {
+        String plain = PlainTextComponentSerializer.plainText().serialize(text);
+        boolean bold = bold(text);
+        int pixels = OBJECT_WIDTH * objects(text);
         for (char character : plain.toCharArray()) {
             pixels += switch (character) {
                 case 'i', '!', '.', ',', ':', ';', '|', '\'' -> 2;
@@ -245,6 +258,16 @@ public final class ClickableHologram {
             } + (bold ? 1 : 0);
         }
         return pixels * PIXEL;
+    }
+
+    private static boolean bold(Component component) {
+        return component.hasDecoration(TextDecoration.BOLD) || component.children().stream().anyMatch(ClickableHologram::bold);
+    }
+
+    private static int objects(Component component) {
+        int count = component instanceof ObjectComponent ? 1 : 0;
+        for (Component child : component.children()) count += objects(child);
+        return count;
     }
 
     private void send(PacketWrapper<?> packet) {
