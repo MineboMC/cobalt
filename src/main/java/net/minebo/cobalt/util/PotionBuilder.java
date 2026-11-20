@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import java.util.List;
+import java.util.Arrays;
 
 public class PotionBuilder {
 
@@ -46,7 +46,7 @@ public class PotionBuilder {
      */
     public PotionBuilder setLore(String...lore) {
         if (itemMeta == null) itemMeta = itemStack.getItemMeta();
-        itemMeta.setLore(List.of(lore));
+        itemMeta.setLore(Arrays.stream(lore).map(Coloring::translateColors).toList());
         if (itemMeta instanceof PotionMeta) potionMeta = (PotionMeta) itemMeta;
         return this;
     }

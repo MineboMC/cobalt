@@ -2,7 +2,6 @@ package net.minebo.cobalt.service.nametag;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.List;
 import java.util.Objects;
 
 public final class Nametag {
@@ -13,22 +12,22 @@ public final class Nametag {
     private final String suffix;
     private final boolean visible;
     private final NamedTextColor color;
-    private final List<String> lines;
+    private final String belowName;
 
     public Nametag(String prefix, String suffix, boolean visible) {
         this(prefix, suffix, visible, NamedTextColor.WHITE);
     }
 
     public Nametag(String prefix, String suffix, boolean visible, NamedTextColor color) {
-        this(prefix, suffix, visible, color, List.of());
+        this(prefix, suffix, visible, color, "");
     }
 
-    public Nametag(String prefix, String suffix, boolean visible, NamedTextColor color, List<String> lines) {
+    public Nametag(String prefix, String suffix, boolean visible, NamedTextColor color, String belowName) {
         this.prefix = prefix == null ? "" : prefix;
         this.suffix = suffix == null ? "" : suffix;
         this.visible = visible;
         this.color = color == null ? NamedTextColor.WHITE : color;
-        this.lines = lines == null ? List.of() : List.copyOf(lines);
+        this.belowName = belowName == null ? "" : belowName;
     }
 
     public static Nametag of(String prefix, String suffix) {
@@ -67,18 +66,15 @@ public final class Nametag {
     }
 
     /**
-     * Extra lines shown above the name, top line first.
+     * A line under the name, Minecraft's own below-name score: it hides with the name for invisible players,
+     * fades when they sneak and never shows on your own. Empty for none.
      */
-    public List<String> lines() {
-        return lines;
+    public String belowName() {
+        return belowName;
     }
 
-    public Nametag withLines(String... lines) {
-        return withLines(List.of(lines));
-    }
-
-    public Nametag withLines(List<String> lines) {
-        return new Nametag(prefix, suffix, visible, color, lines);
+    public Nametag withBelowName(String belowName) {
+        return new Nametag(prefix, suffix, visible, color, belowName);
     }
 
     @Override
@@ -93,11 +89,11 @@ public final class Nametag {
                 && Objects.equals(prefix, other.prefix)
                 && Objects.equals(suffix, other.suffix)
                 && Objects.equals(color, other.color)
-                && Objects.equals(lines, other.lines);
+                && Objects.equals(belowName, other.belowName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(prefix, suffix, visible, color, lines);
+        return Objects.hash(prefix, suffix, visible, color, belowName);
     }
 }

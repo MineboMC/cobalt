@@ -113,7 +113,7 @@ public final class NpcCommand extends BaseCommand {
         new NpcEditorMenu(CobaltAPI.getNpcService(), npc).openMenu(player);
     }
 
-    @Subcommand("here|bring")
+    @Subcommand("here|bring|s|movehere")
     @Syntax("<npc>")
     @Description("Move an NPC to your location.")
     @CommandCompletion("@npcs")

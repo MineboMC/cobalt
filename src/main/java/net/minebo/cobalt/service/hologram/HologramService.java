@@ -6,6 +6,7 @@ import net.minebo.cobalt.CobaltAPI;
 import net.minebo.cobalt.service.CService;
 import net.minebo.cobalt.service.command.defaults.command.HologramCommand;
 import net.minebo.cobalt.service.hologram.api.HologramApi;
+import net.minebo.cobalt.service.hologram.clickable.ClickableHolograms;
 import net.minebo.cobalt.service.hologram.listener.HologramListener;
 import net.minebo.cobalt.service.hologram.packet.HologramPacketSender;
 import net.minebo.cobalt.service.hologram.registry.HologramRegistry;
@@ -31,6 +32,7 @@ public final class HologramService extends CService {
     private HologramStore store;
     private BukkitTask task;
     private BukkitTask updateTask;
+    private ClickableHolograms clickables;
 
     @Override
     public String getName() {
@@ -47,6 +49,8 @@ public final class HologramService extends CService {
         Bukkit.getPluginManager().registerEvents(listener, Cobalt.getInstance());
         task = new HologramUpdateViewersTask().runTaskTimer(Cobalt.getInstance(), 5, 20L);
         updateTask = new HologramUpdateTask().runTaskTimer(Cobalt.getInstance(), 5, 5L);
+        clickables = new ClickableHolograms();
+        clickables.start();
 
         this.useStore(CobaltAPI.getStoreService());
     }
@@ -60,6 +64,7 @@ public final class HologramService extends CService {
             updateTask.cancel();
         }
         HandlerList.unregisterAll(listener);
+        if (clickables != null) clickables.stop();
         for (Player player : Bukkit.getOnlinePlayers()) {
             for (Hologram hologram : registry.all()) {
                 hide(player, hologram);
@@ -71,6 +76,7 @@ public final class HologramService extends CService {
 
     public HologramApi api() { return api; }
     public HologramRegistry registry() { return registry; }
+    public ClickableHolograms clickables() { return clickables; }
 
     public Hologram create(String id, Location location, List<String> lines, Boolean internal) {
         Hologram existing = registry.get(id);

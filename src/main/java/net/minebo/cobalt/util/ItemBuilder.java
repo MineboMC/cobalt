@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,7 +70,7 @@ public class ItemBuilder {
 
     public ItemBuilder setLore(String... lore) {
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setLore(List.of(lore));
+        meta.setLore(Arrays.stream(lore).map(Coloring::translateColors).toList());
         itemStack.setItemMeta(meta);
         return this;
     }

@@ -22,7 +22,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 
-@CommandAlias("holo|hologram")
+@CommandAlias("holo|hologram|hd")
 @CommandPermission("cobalt.hologram")
 @Description("Create and manage packet holograms.")
 public final class HologramCommand extends BaseCommand {
@@ -72,7 +72,7 @@ public final class HologramCommand extends BaseCommand {
         new HologramEditorMenu(CobaltAPI.getHologramService(), hologram).openMenu(player);
     }
 
-    @Subcommand("here|bring")
+    @Subcommand("here|bring|s|movehere")
     @Syntax("<id>")
     @Description("Move a hologram to your location.")
     @CommandCompletion("@holograms")

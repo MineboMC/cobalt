@@ -22,6 +22,8 @@ import java.util.Optional;
 
 public final class HologramPacketSender {
 
+    private static final byte MARKER = 0x10;
+    private static final double ARMOR_STAND_HEIGHT = 1.975D;
     private static final int MAX_LINES = 32;
 
     public void spawn(Player viewer, Hologram hologram, List<String> lines) {
@@ -88,11 +90,13 @@ public final class HologramPacketSender {
                 empty ? Optional.empty() : Optional.of(Coloring.toComponent(text))));
         data.add(new EntityData<>(3, EntityDataTypes.BOOLEAN, !empty));
         data.add(new EntityData<>(5, EntityDataTypes.BOOLEAN, true));
+        data.add(new EntityData<>(15, EntityDataTypes.BYTE, MARKER)); // no hitbox, clicks go through to what's behind it
         send(viewer, new WrapperPlayServerEntityMetadata(entityId, data));
     }
 
     private static org.bukkit.Location lineLocation(org.bukkit.Location base, double spacing, int index, int total) {
-        double y = base.getY() + ((total - 1 - index) * spacing);
+        // a marker's name sits at its feet, raised to where a full armor stand's would be
+        double y = base.getY() + ARMOR_STAND_HEIGHT + ((total - 1 - index) * spacing);
         return new org.bukkit.Location(base.getWorld(), base.getX(), y, base.getZ());
     }
 
